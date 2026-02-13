@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Audio Input (Microphone) -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+
+    <!-- Camera -->
+    <key>com.apple.security.device.camera</key>
+    <true/>
+
+    <!-- Network client (for A2A communication) -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <!-- Allow JIT for WebView/JavaScript -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+
+    <!-- Allow unsigned executable memory for WebView -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+</dict>
+</plist>

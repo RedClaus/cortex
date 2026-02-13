@@ -1,0 +1,8 @@
+{
+  "name": "Frontier Code Review & Feature Architect",
+  "description": "A sophisticated system for analyzing white papers and repositories against existing codebases to generate actionable Change Requests for AI-driven development.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

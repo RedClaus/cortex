@@ -1,0 +1,167 @@
+/* Pinky WebUI - Retro-Futuristic Control Room Theme */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Core palette - Deep space with amber/green accents */
+  --void: #0a0e14;
+  --surface: #0f141c;
+  --surface-elevated: #151c28;
+  --surface-highlight: #1a2332;
+
+  /* Terminal colors */
+  --amber: #ffb347;
+  --amber-dim: #cc8a2e;
+  --amber-glow: rgba(255, 179, 71, 0.15);
+  --green: #4ade80;
+  --green-dim: #22c55e;
+  --green-glow: rgba(74, 222, 128, 0.15);
+  --cyan: #22d3ee;
+  --cyan-glow: rgba(34, 211, 238, 0.1);
+  --red: #f87171;
+  --red-glow: rgba(248, 113, 113, 0.15);
+
+  /* Text hierarchy */
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a8;
+  --text-muted: #5c6370;
+
+  /* Borders and dividers */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(255, 179, 71, 0.3);
+
+  /* Typography */
+  --font-mono: 'IBM Plex Mono', 'SF Mono', 'Fira Code', monospace;
+  --font-display: 'Outfit', -apple-system, sans-serif;
+
+  /* Spacing */
+  --gap-xs: 4px;
+  --gap-sm: 8px;
+  --gap-md: 16px;
+  --gap-lg: 24px;
+  --gap-xl: 32px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--void);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* CRT Scanline Effect */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  opacity: 0.3;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--amber-dim);
+}
+
+/* Selection */
+::selection {
+  background: var(--amber);
+  color: var(--void);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 1px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* Keyframes */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Button base */
+button {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  transition: var(--transition-fast);
+}
+
+/* Input base */
+input, textarea {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: var(--gap-sm) var(--gap-md);
+  border-radius: 4px;
+  transition: var(--transition-fast);
+}
+
+input:focus, textarea:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-glow);
+}

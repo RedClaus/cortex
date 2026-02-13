@@ -1,0 +1,337 @@
+// Package ui provides examples of command system integration.
+//
+// This file demonstrates how to integrate the slash command system
+// into a Bubble Tea Model's Update() method.
+//
+// NOTE: This file is excluded from builds (via build tag) to avoid
+// conflicts with the actual Model implementation. It exists purely
+// for documentation and reference purposes.
+
+//go:build example
+// +build example
+
+package ui
+
+import (
+	"fmt"
+	"strings"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/bubbles/viewport"
+)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// EXAMPLE MODEL INTEGRATION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// This is an example Model struct showing the minimal fields needed
+// for command system integration.
+//
+// NOTE: This is for documentation purposes only. The actual Model
+// should be defined in your main application package.
+type ExampleModel struct {
+	// UI Components
+	viewport viewport.Model
+	input    textarea.Model
+
+	// Backend
+	backend Backend
+
+	// State
+	messages       []string
+	currentModel   ModelInfo
+	currentSession SessionInfo
+	theme          Theme
+	currentModal   ModalType
+
+	// Modes
+	yoloMode bool
+	planMode bool
+
+	// Status
+	statusMessage string
+}
+
+// ModalType represents different modal states
+type ModalType int
+
+const (
+	ModalNone ModalType = iota
+	ModalHelp
+	ModalModelSelector
+	ModalThemeSelector
+	ModalSessionSelector
+)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// UPDATE METHOD - COMMAND INTEGRATION EXAMPLE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Update handles Bubble Tea messages and integrates the command system.
+//
+// This example shows:
+// 1. How to route input based on prefix (/, !, or regular chat)
+// 2. How to handle all command-related messages
+// 3. Proper state updates for each message type
+func (m ExampleModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// KEYBOARD INPUT
+	// ─────────────────────────────────────────────────────────────────────────
+	case tea.KeyMsg:
+		// Handle modal-specific keys if modal is open
+		if m.currentModal != ModalNone {
+			return m.handleModalKey(msg)
+		}
+
+		switch msg.String() {
+		case "ctrl+c":
+			return m, tea.Quit
+
+		case "enter":
+			return m, m.handleSubmit()
+
+		default:
+			// Update input field
+			var cmd tea.Cmd
+			m.input, cmd = m.input.Update(msg)
+			return m, cmd
+		}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// COMMAND MESSAGES - Modal Triggers
+	// ─────────────────────────────────────────────────────────────────────────
+	case ShowHelpMsg:
+		m.currentModal = ModalHelp
+		return m, nil
+
+	case ShowModelSelectorMsg:
+		m.currentModal = ModalModelSelector
+		// Fetch models when opening selector
+		return m, FetchModelsCmd(m.backend)
+
+	case ShowThemeSelectorMsg:
+		m.currentModal = ModalThemeSelector
+		return m, nil
+
+	case ShowSessionSelectorMsg:
+		m.currentModal = ModalSessionSelector
+		// Fetch sessions when opening selector
+		return m, FetchSessionsCmd(m.backend)
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// COMMAND MESSAGES - Mode Toggles
+	// ─────────────────────────────────────────────────────────────────────────
+	case ToggleYoloMsg:
+		m.yoloMode = !m.yoloMode
+		if m.yoloMode {
+			m.statusMessage = "⚠ YOLO MODE ENABLED - Commands run without confirmation!"
+		} else {
+			m.statusMessage = "YOLO mode disabled"
+		}
+		return m, nil
+
+	case TogglePlanMsg:
+		m.planMode = !m.planMode
+		if m.planMode {
+			m.statusMessage = "Plan mode enabled - AI will create execution plans"
+		} else {
+			m.statusMessage = "Plan mode disabled"
+		}
+		return m, nil
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// COMMAND MESSAGES - State Changes
+	// ─────────────────────────────────────────────────────────────────────────
+	case ClearHistoryMsg:
+		m.messages = []string{}
+		m.statusMessage = "Conversation cleared"
+		m.viewport.SetContent("") // Clear viewport display
+		return m, nil
+
+	case ModelSelectedMsg:
+		m.currentModel = msg.Model
+		m.currentModal = ModalNone
+		m.statusMessage = fmt.Sprintf("Switched to model: %s (%s)",
+			msg.Model.Name, msg.Model.Provider)
+		return m, nil
+
+	case ThemeSelectedMsg:
+		m.theme = GetTheme(msg.ThemeName)
+		m.currentModal = ModalNone
+		m.statusMessage = fmt.Sprintf("Switched to theme: %s", m.theme.Name)
+		// Rebuild all styles with new theme
+		return m, m.rebuildStyles()
+
+	case SessionLoadedMsg:
+		if msg.Error != nil {
+			m.statusMessage = fmt.Sprintf("Error loading session: %v", msg.Error)
+			return m, nil
+		}
+		m.currentSession = msg.Session
+		m.currentModal = ModalNone
+		m.statusMessage = fmt.Sprintf("Loaded session: %s", msg.Session.Name)
+		// TODO: Load session messages from backend
+		return m, nil
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// COMMAND MESSAGES - Shell Execution
+	// ─────────────────────────────────────────────────────────────────────────
+	case ShellCommandMsg:
+		// Add shell command and output as system message
+		var result string
+		if msg.Error != nil {
+			result = fmt.Sprintf("⚠ Shell command failed\n$ %s\n%s\nError: %v",
+				msg.Command, msg.Output, msg.Error)
+		} else {
+			result = fmt.Sprintf("$ %s\n%s", msg.Command, msg.Output)
+		}
+		m.addSystemMessage(result)
+		m.statusMessage = "Shell command executed"
+		return m, nil
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// COMMAND MESSAGES - Errors
+	// ─────────────────────────────────────────────────────────────────────────
+	case CommandErrorMsg:
+		m.statusMessage = fmt.Sprintf("❌ %s", msg.Error)
+		return m, nil
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// STREAMING MESSAGES (for regular chat)
+	// ─────────────────────────────────────────────────────────────────────────
+	case StreamChunkMsg:
+		// Handle streaming AI response
+		// (See messages.go for streaming implementation)
+		return m, streamReaderCmd(m.backend.StreamChannel())
+
+	case StreamDoneMsg:
+		m.statusMessage = "Response complete"
+		return m, nil
+
+	}
+
+	return m, nil
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HELPER METHODS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// handleSubmit processes input and routes to commands or chat.
+//
+// Routing logic:
+//   - Input starting with "/" → Slash command
+//   - Input starting with "!" → Shell escape
+//   - Everything else → Regular chat message
+func (m *ExampleModel) handleSubmit() tea.Cmd {
+	content := strings.TrimSpace(m.input.Value())
+
+	if content == "" {
+		return nil
+	}
+
+	// Clear input field
+	m.input.SetValue("")
+
+	// Route based on prefix
+	if strings.HasPrefix(content, "/") {
+		// Slash command
+		return HandleCommand(content, m.backend)
+	}
+
+	if strings.HasPrefix(content, "!") {
+		// Shell escape - optionally check YOLO mode for confirmation
+		if !m.yoloMode {
+			// TODO: Show confirmation dialog
+			// For now, just execute
+		}
+		return HandleShellEscape(content)
+	}
+
+	// Regular chat message
+	m.addUserMessage(content)
+	return SendMessageCmd(m.backend, content)
+}
+
+// handleModalKey handles keyboard input when a modal is open.
+func (m *ExampleModel) handleModalKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "esc", "q":
+		// Close modal
+		m.currentModal = ModalNone
+		return m, nil
+
+	// TODO: Handle modal-specific keys (arrow keys, enter, etc.)
+	}
+
+	return m, nil
+}
+
+// rebuildStyles rebuilds all component styles with the current theme.
+func (m *ExampleModel) rebuildStyles() tea.Cmd {
+	// TODO: Rebuild lipgloss styles using m.theme colors
+	return nil
+}
+
+// addUserMessage adds a user message to the conversation.
+func (m *ExampleModel) addUserMessage(content string) {
+	m.messages = append(m.messages, fmt.Sprintf("You: %s", content))
+	// TODO: Update viewport content
+}
+
+// addSystemMessage adds a system message to the conversation.
+func (m *ExampleModel) addSystemMessage(content string) {
+	m.messages = append(m.messages, fmt.Sprintf("System: %s", content))
+	// TODO: Update viewport content
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// USAGE EXAMPLES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/*
+Example interaction flows:
+
+1. Help Command:
+   User types: /help
+   → HandleCommand() returns ShowHelpMsg
+   → Update() sets currentModal = ModalHelp
+   → View() renders help modal overlay
+
+2. Direct Model Switch:
+   User types: /model gpt-4
+   → HandleCommand() calls cmdModel(["gpt-4"])
+   → cmdModel() fetches models, finds match
+   → Returns ModelSelectedMsg
+   → Update() updates currentModel, shows confirmation
+
+3. Theme Switch with Validation:
+   User types: /theme invalid-theme
+   → HandleCommand() calls cmdTheme(["invalid-theme"])
+   → cmdTheme() validates against ThemeNames()
+   → Returns CommandErrorMsg (not found)
+   → Update() shows error in status bar
+
+4. Shell Command:
+   User types: !git status
+   → handleSubmit() routes to HandleShellEscape()
+   → Shell command executes
+   → Returns ShellCommandMsg with output
+   → Update() adds output to conversation
+
+5. Unknown Command:
+   User types: /unknown-cmd
+   → HandleCommand() routes to cmdUnknown()
+   → Returns CommandErrorMsg
+   → Update() shows "Unknown command" message
+
+6. Regular Chat:
+   User types: Hello, how can you help?
+   → handleSubmit() routes to SendMessageCmd()
+   → Backend streams response
+   → Update() receives StreamChunkMsg repeatedly
+   → View() displays streaming response
+*/

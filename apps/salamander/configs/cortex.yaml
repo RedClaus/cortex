@@ -1,0 +1,671 @@
+# Salamander Configuration for Cortex Brain TUI
+# This configuration provides the full Cortex TUI experience through YAML
+
+version: "1.0"
+
+app:
+  name: "Cortex"
+  description: "AI-Powered Terminal Assistant with Brain Executive"
+  version: "2.0.0"
+  author: "Norman King"
+  show_status_bar: true
+  show_title_bar: true
+  welcome_message: |
+    Welcome to Cortex! Type a message or use / for commands.
+    Connected to Brain Executive with 14+ cognitive lobes.
+
+theme:
+  name: "Cortex Dark"
+  mode: "dark"
+  colors:
+    primary: "#7C3AED"      # Violet
+    secondary: "#10B981"    # Emerald
+    background: "#0F172A"   # Slate 900
+    surface: "#1E293B"      # Slate 800
+    text: "#F8FAFC"         # Slate 50
+    text_muted: "#94A3B8"   # Slate 400
+    border: "#334155"       # Slate 700
+    error: "#EF4444"        # Red 500
+    success: "#22C55E"      # Green 500
+    warning: "#F59E0B"      # Amber 500
+    info: "#3B82F6"         # Blue 500
+    accent: "#EC4899"       # Pink 500
+  styles:
+    input:
+      border_style: "rounded"
+      padding: [0, 1]
+    message:
+      padding: [1, 2]
+    menu:
+      border_style: "rounded"
+      background: "#1E293B"
+
+layout:
+  type: "chat"
+  components:
+    - id: "chat_view"
+      type: "chat"
+      position:
+        anchor: "top"
+      size:
+        height: "100%"
+      options:
+        markdown: true
+        syntax_highlighting: true
+        streaming: true
+        
+    - id: "input_bar"
+      type: "input"
+      position:
+        anchor: "bottom"
+      size:
+        height: "3"
+      options:
+        placeholder: "Ask anything..."
+        multiline: false
+        
+    - id: "status_bar"
+      type: "status"
+      position:
+        anchor: "bottom"
+      size:
+        height: "1"
+
+menus:
+  - id: "main_menu"
+    trigger: "/"
+    title: "Commands"
+    filterable: true
+    max_visible: 10
+    items:
+      # ─── General ───
+      - id: "help"
+        label: "help"
+        description: "Show help and available commands"
+        category: "General"
+        icon: "❓"
+        action:
+          type: "command"
+          command: "show_help"
+          
+      - id: "clear"
+        label: "clear"
+        description: "Clear the chat history"
+        category: "General"
+        icon: "🧹"
+        shortcut: "ctrl+l"
+        action:
+          type: "command"
+          command: "clear_chat"
+          
+      - id: "quit"
+        label: "quit"
+        description: "Exit Cortex"
+        category: "General"
+        icon: "👋"
+        shortcut: "ctrl+c"
+        action:
+          type: "quit"
+          
+      - id: "stop"
+        label: "stop"
+        description: "Stop current agent task"
+        category: "General"
+        icon: "🛑"
+        shortcut: "ctrl+x"
+        action:
+          type: "command"
+          command: "stop_task"
+
+      # ─── Model Selection ───
+      - id: "select"
+        label: "select"
+        description: "Select LLM provider and model"
+        category: "Model"
+        icon: "🤖"
+        action:
+          type: "submenu"
+        submenu:
+          id: "provider_menu"
+          title: "Select Provider"
+          filterable: true
+          items:
+            - id: "ollama"
+              label: "Ollama"
+              description: "Local models (no API key needed)"
+              icon: "🦙"
+              action:
+                type: "submenu"
+              submenu:
+                id: "ollama_endpoint_menu"
+                title: "Ollama Endpoint"
+                items:
+                  - id: "ollama_local"
+                    label: "Local Ollama"
+                    description: "http://localhost:11434"
+                    action:
+                      type: "submenu"
+                    submenu:
+                      id: "ollama_models"
+                      title: "Select Model"
+                      filterable: true
+                      items:
+                        # Dynamic - loaded from Ollama API
+                        - id: "_dynamic"
+                          label: "Loading models..."
+                          action:
+                            type: "command"
+                            command: "fetch_ollama_models"
+                            args:
+                              endpoint: "http://localhost:11434"
+                  - id: "ollama_custom"
+                    label: "Remote/Custom"
+                    description: "Enter custom endpoint URL"
+                    action:
+                      type: "open_dialog"
+                      dialog: "ollama_endpoint_input"
+                      
+            - id: "anthropic"
+              label: "Anthropic"
+              description: "Claude Sonnet 4, Opus 4, etc."
+              icon: "🧠"
+              action:
+                type: "submenu"
+              submenu:
+                id: "anthropic_models"
+                title: "Claude Models"
+                filterable: true
+                items:
+                  - id: "claude-sonnet-4-20250514"
+                    label: "Claude Sonnet 4"
+                    description: "Latest, best balance"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "anthropic"
+                        model: "claude-sonnet-4-20250514"
+                  - id: "claude-opus-4-20250514"
+                    label: "Claude Opus 4"
+                    description: "Most capable"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "anthropic"
+                        model: "claude-opus-4-20250514"
+                  - id: "claude-3-7-sonnet-20250219"
+                    label: "Claude 3.7 Sonnet"
+                    description: "Extended thinking"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "anthropic"
+                        model: "claude-3-7-sonnet-20250219"
+                  - id: "claude-3-5-haiku-20241022"
+                    label: "Claude 3.5 Haiku"
+                    description: "Fast & affordable"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "anthropic"
+                        model: "claude-3-5-haiku-20241022"
+                        
+            - id: "openai"
+              label: "OpenAI"
+              description: "GPT-4o, GPT-4, GPT-3.5"
+              icon: "🌐"
+              action:
+                type: "submenu"
+              submenu:
+                id: "openai_models"
+                title: "OpenAI Models"
+                filterable: true
+                items:
+                  - id: "gpt-4o"
+                    label: "GPT-4o"
+                    description: "Most capable, multimodal"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "openai"
+                        model: "gpt-4o"
+                  - id: "gpt-4o-mini"
+                    label: "GPT-4o Mini"
+                    description: "Fast & affordable"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "openai"
+                        model: "gpt-4o-mini"
+                  - id: "gpt-4-turbo"
+                    label: "GPT-4 Turbo"
+                    description: "High performance"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "openai"
+                        model: "gpt-4-turbo"
+                        
+            - id: "gemini"
+              label: "Google Gemini"
+              description: "Gemini 2.5 Pro, Flash"
+              icon: "💎"
+              action:
+                type: "submenu"
+              submenu:
+                id: "gemini_models"
+                title: "Gemini Models"
+                filterable: true
+                items:
+                  - id: "gemini-2.5-pro"
+                    label: "Gemini 2.5 Pro"
+                    description: "Most capable"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "gemini"
+                        model: "gemini-2.5-pro"
+                  - id: "gemini-2.5-flash"
+                    label: "Gemini 2.5 Flash"
+                    description: "Best balance"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "gemini"
+                        model: "gemini-2.5-flash"
+                        
+            - id: "grok"
+              label: "xAI Grok"
+              description: "Grok-3, Grok-3-Fast"
+              icon: "🚀"
+              action:
+                type: "submenu"
+              submenu:
+                id: "grok_models"
+                title: "Grok Models"
+                filterable: true
+                items:
+                  - id: "grok-3"
+                    label: "Grok-3"
+                    description: "Flagship model"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "grok"
+                        model: "grok-3"
+                  - id: "grok-3-fast"
+                    label: "Grok-3 Fast"
+                    description: "Faster responses"
+                    action:
+                      type: "command"
+                      command: "set_model"
+                      args:
+                        provider: "grok"
+                        model: "grok-3-fast"
+
+      - id: "model"
+        label: "model"
+        description: "Show current LLM configuration"
+        category: "Model"
+        icon: "ℹ️"
+        action:
+          type: "command"
+          command: "show_model_info"
+          
+      - id: "setkey"
+        label: "setkey"
+        description: "Set API key for a provider"
+        category: "Model"
+        icon: "🔑"
+        action:
+          type: "open_dialog"
+          dialog: "api_key_input"
+
+      # ─── Theme ───
+      - id: "theme"
+        label: "theme"
+        description: "Change color theme"
+        category: "System"
+        icon: "🎨"
+        action:
+          type: "submenu"
+        submenu:
+          id: "theme_menu"
+          title: "Select Theme"
+          filterable: true
+          items:
+            # Dark themes
+            - id: "cortex_dark"
+              label: "Cortex Dark"
+              description: "Default dark theme"
+              category: "dark"
+              action:
+                type: "command"
+                command: "set_theme"
+                args:
+                  theme: "cortex_dark"
+            - id: "tokyo_night"
+              label: "Tokyo Night"
+              description: "Dark theme"
+              category: "dark"
+              action:
+                type: "command"
+                command: "set_theme"
+                args:
+                  theme: "tokyo_night"
+            - id: "dracula"
+              label: "Dracula"
+              description: "Dark theme"
+              category: "dark"
+              action:
+                type: "command"
+                command: "set_theme"
+                args:
+                  theme: "dracula"
+            - id: "nord"
+              label: "Nord"
+              description: "Dark theme"
+              category: "dark"
+              action:
+                type: "command"
+                command: "set_theme"
+                args:
+                  theme: "nord"
+            # Light themes
+            - id: "cortex_light"
+              label: "Cortex Light"
+              description: "Light theme"
+              category: "light"
+              action:
+                type: "command"
+                command: "set_theme"
+                args:
+                  theme: "cortex_light"
+            - id: "github_light"
+              label: "GitHub Light"
+              description: "Light theme"
+              category: "light"
+              action:
+                type: "command"
+                command: "set_theme"
+                args:
+                  theme: "github_light"
+
+      # ─── Knowledge ───
+      - id: "knowledge"
+        label: "knowledge"
+        description: "Search knowledge base"
+        category: "Knowledge"
+        icon: "📚"
+        action:
+          type: "open_dialog"
+          dialog: "knowledge_search"
+          
+      - id: "learn"
+        label: "learn"
+        description: "Add new knowledge item"
+        category: "Knowledge"
+        icon: "📝"
+        action:
+          type: "open_dialog"
+          dialog: "learn_input"
+          
+      - id: "ingest"
+        label: "ingest"
+        description: "Ingest file or directory into knowledge base"
+        category: "Knowledge"
+        icon: "📥"
+        action:
+          type: "open_dialog"
+          dialog: "ingest_path"
+
+      # ─── Voice ───
+      - id: "device"
+        label: "device"
+        description: "Configure audio devices (mic/speaker)"
+        category: "Voice"
+        icon: "🎤"
+        action:
+          type: "open_dialog"
+          dialog: "audio_device_selector"
+          
+      - id: "voice"
+        label: "voice"
+        description: "Change TTS voice (Kokoro local + Resemble cloud)"
+        category: "Voice"
+        icon: "🗣️"
+        action:
+          type: "open_dialog"
+          dialog: "voice_selector"
+          
+      - id: "tts"
+        label: "tts"
+        description: "Switch TTS provider (local/cloud)"
+        category: "Voice"
+        icon: "🔊"
+        action:
+          type: "submenu"
+        submenu:
+          id: "tts_menu"
+          title: "TTS Provider"
+          items:
+            - id: "kokoro"
+              label: "Kokoro (Local)"
+              description: "Fast, runs locally"
+              action:
+                type: "command"
+                command: "set_tts_provider"
+                args:
+                  provider: "kokoro"
+            - id: "resemble"
+              label: "Resemble.ai (Cloud)"
+              description: "Premium voices, requires API key"
+              action:
+                type: "command"
+                command: "set_tts_provider"
+                args:
+                  provider: "resemble"
+
+      # ─── Tools ───
+      - id: "tools"
+        label: "tools"
+        description: "List available tools"
+        category: "Tools"
+        icon: "🔧"
+        action:
+          type: "command"
+          command: "list_tools"
+          
+      - id: "run"
+        label: "run"
+        description: "Execute a shell command directly"
+        category: "Tools"
+        icon: "⚡"
+        action:
+          type: "open_dialog"
+          dialog: "shell_command"
+          
+      - id: "websearch"
+        label: "websearch"
+        description: "Configure web search (Tavily API)"
+        category: "Tools"
+        icon: "🌐"
+        action:
+          type: "open_dialog"
+          dialog: "websearch_config"
+
+      # ─── System ───
+      - id: "config"
+        label: "config"
+        description: "Show current configuration"
+        category: "System"
+        icon: "⚙️"
+        action:
+          type: "command"
+          command: "show_config"
+          
+      - id: "status"
+        label: "status"
+        description: "Show system status and stats"
+        category: "System"
+        icon: "📊"
+        action:
+          type: "command"
+          command: "show_status"
+          
+      - id: "cwd"
+        label: "cwd"
+        description: "Show/change working directory"
+        category: "System"
+        icon: "📁"
+        action:
+          type: "open_dialog"
+          dialog: "cwd_input"
+
+      # ─── History ───
+      - id: "history"
+        label: "history"
+        description: "Show input history"
+        category: "History"
+        icon: "📜"
+        action:
+          type: "command"
+          command: "show_history"
+          
+      - id: "export"
+        label: "export"
+        description: "Export chat to file"
+        category: "History"
+        icon: "💾"
+        action:
+          type: "open_dialog"
+          dialog: "export_path"
+          
+      - id: "logs"
+        label: "logs"
+        description: "Show recent conversation logs"
+        category: "History"
+        icon: "📋"
+        action:
+          type: "command"
+          command: "show_logs"
+
+      # ─── Advanced ───
+      - id: "brain"
+        label: "brain"
+        description: "Process through Brain Executive (Cognitive Architecture)"
+        category: "Advanced"
+        icon: "🧠"
+        action:
+          type: "command"
+          command: "toggle_brain_mode"
+          
+      - id: "unrestricted"
+        label: "unrestricted"
+        description: "Toggle unrestricted mode (bypass LLM safety)"
+        category: "Settings"
+        icon: "⚠️"
+        action:
+          type: "command"
+          command: "toggle_unrestricted"
+
+      # ─── UI Builder (Salamander-specific) ───
+      - id: "builder"
+        label: "builder"
+        description: "Open YAML UI Builder to customize this interface"
+        category: "Salamander"
+        icon: "🛠️"
+        action:
+          type: "open_dialog"
+          dialog: "yaml_builder"
+          
+      - id: "dashboard"
+        label: "dashboard"
+        description: "Show Salamander dashboard"
+        category: "Salamander"
+        icon: "📈"
+        action:
+          type: "command"
+          command: "show_dashboard"
+
+keybindings:
+  - key: "ctrl+c"
+    action:
+      type: "command"
+      command: "stop_or_quit"
+    description: "Stop task or quit"
+    context: "global"
+    
+  - key: "ctrl+l"
+    action:
+      type: "command"
+      command: "clear_chat"
+    description: "Clear chat"
+    context: "global"
+    
+  - key: "ctrl+k"
+    action:
+      type: "command"
+      command: "focus_input"
+    description: "Focus input"
+    context: "global"
+    
+  # Note: "/" menu trigger is handled by menus[].trigger, not keybindings
+
+  - key: "escape"
+    action:
+      type: "command"
+      command: "close_menu"
+    description: "Close menu"
+    context: "menu"
+    
+  - key: "up"
+    action:
+      type: "command"
+      command: "menu_up"
+    description: "Move up in menu"
+    context: "menu"
+    
+  - key: "down"
+    action:
+      type: "command"
+      command: "menu_down"
+    description: "Move down in menu"
+    context: "menu"
+    
+  - key: "enter"
+    action:
+      type: "command"
+      command: "menu_select"
+    description: "Select menu item"
+    context: "menu"
+    
+  - key: "backspace"
+    action:
+      type: "command"
+      command: "menu_back"
+    description: "Go back in menu"
+    context: "menu"
+    
+  - key: "f1"
+    action:
+      type: "command"
+      command: "show_help"
+    description: "Show help"
+    context: "global"
+
+backend:
+  type: "a2a"
+  url: "http://localhost:8080"
+  streaming: true
+  timeout: 120
+  retry_count: 3

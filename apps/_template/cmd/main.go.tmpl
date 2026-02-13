@@ -1,0 +1,40 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+)
+
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Handle graceful shutdown
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-sigCh
+		fmt.Println("\nShutting down APP_NAME...")
+		cancel()
+	}()
+
+	if err := run(ctx); err != nil {
+		log.Fatalf("APP_NAME failed: %v", err)
+	}
+}
+
+func run(ctx context.Context) error {
+	fmt.Println("APP_NAME starting...")
+
+	// TODO: Initialize plugin
+	// TODO: Register with CortexBrain via A2A
+	// TODO: Start main loop
+
+	<-ctx.Done()
+	return nil
+}

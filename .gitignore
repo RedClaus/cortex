@@ -1,0 +1,56 @@
+# Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/tmp/
+
+# Test artifacts
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Go workspace
+go.work.sum
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build output
+/bin/
+/dist/
+
+# Environment
+.env
+.env.local
+
+# Config files with secrets
+config.yaml
+config.yaml.*
+!config.yaml.example.clean
+
+# Vendor (if used)
+vendor/
+
+# Python virtual environments
+**/venv/
+**/.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Node modules
+**/node_modules/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+knowledge.db

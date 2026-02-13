@@ -1,0 +1,25 @@
+{
+  "name": "gateflow",
+  "version": "1.5.0",
+  "description": "AI-powered SystemVerilog development assistant with lint fixing, code generation, simulation, and waveform analysis",
+  "author": {
+    "name": "codejunkie99",
+    "github": "https://github.com/codejunkie99",
+    "twitter": "https://x.com/Av1dlive"
+  },
+  "keywords": [
+    "systemverilog",
+    "verilog",
+    "hdl",
+    "rtl",
+    "fpga",
+    "asic",
+    "lint",
+    "verilator",
+    "testbench",
+    "waveform",
+    "vcd"
+  ],
+  "license": "BSL-1.1",
+  "repository": "https://github.com/codejunkie99/Gateflow-Plugin"
+}

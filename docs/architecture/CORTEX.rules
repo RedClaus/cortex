@@ -1,0 +1,102 @@
+# Cortex Project Rules & Standards
+
+This file defines the strict professional standards for development, testing, and quality control. Every AI interaction must adhere to these guidelines.
+
+---
+
+## 1. Software Engineering Principles
+
+* **Clean Code:** Follow SOLID principles. Prioritize readability over cleverness.
+* **DRY (Don't Repeat Yourself):** Abstract common logic into reusable helpers or services.
+* **Naming Conventions:**
+  - `PascalCase` for classes/types
+  - `camelCase` for variables/functions (JavaScript/TypeScript)
+  - `snake_case` for variables/functions (Go/Python/Rust)
+  - `SCREAMING_SNAKE_CASE` for constants
+* **Modularity:** Keep functions small and focused on a single responsibility (Single Responsibility Principle).
+* **Performance:** Avoid N+1 queries. Use efficient data structures. Prefer async/await over raw promises or callbacks.
+
+---
+
+## 2. Testing & Quality Control (QC)
+
+* **TDD First:** When adding features, write the test case first to define the expected behavior.
+* **Coverage:** Every new feature must include Unit Tests. Critical paths require Integration Tests.
+* **Edge Cases:** Always test null/undefined inputs, empty states, and extreme values.
+* **Deterministic Tests:** Ensure tests do not rely on external API state or system time unless mocked.
+* **Test Naming:** Use the pattern: `MethodName_StateUnderTest_ExpectedBehavior` (e.g., `calculateTotal_EmptyCart_ReturnsZero`).
+
+---
+
+## 3. Bug Fixing & Diagnostics
+
+* **Root Cause Analysis:** Before fixing, explain *why* the bug occurred. Do not just treat the symptom.
+* **Regression Prevention:** Every bug fix must be accompanied by a regression test that fails without the fix and passes with it.
+* **Error Handling:** Never use empty `catch` blocks. Use meaningful error messages and log relevant context for debugging.
+* **Sanity Checks:** Validate all external inputs and API responses before processing.
+
+---
+
+## 4. Security & Reliability
+
+* **Least Privilege:** Ensure functions only have access to the data they absolutely need.
+* **Input Validation:** Sanitize and validate all user-provided data to prevent Injection or XSS.
+* **Secrets:** Never hardcode API keys or credentials. Use environment variables (e.g., `.env`).
+* **Dependency Audit:** Only use well-vetted, popular libraries. Avoid obscure or hallucinated packages.
+
+---
+
+## 5. Documentation & Workflow
+
+* **Commit Messages:** Follow [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat:`, `fix:`, `docs:`, `test:`).
+* **Documentation:** Maintain JSDoc/Docstrings for all public-facing methods. Keep the `README.md` updated with setup changes.
+* **Self-Correction:** If Claude makes an error, it must acknowledge it, explain the mistake, and provide the corrected path.
+
+---
+
+## 6. Language-Specific Standards
+
+| Language | Linting | Testing | Package Manager |
+|----------|---------|---------|-----------------|
+| **Go** | `golangci-lint` | `go test ./...` | Go modules |
+| **Python** | `ruff`, `mypy` | `pytest` | `uv` |
+| **TypeScript** | `eslint`, `prettier` | `vitest`/`jest` | `npm`/`pnpm` |
+| **Rust** | `clippy` | `cargo test` | Cargo |
+| **Svelte** | `eslint`, `prettier` | `vitest` | `npm`/`pnpm` |
+
+---
+
+## 7. Tech Stack Specifics
+
+### Go Projects (CortexBrain, CortexAvatar, GoMenu)
+- Use `internal/` for private packages, `pkg/` for public API
+- Error wrapping: `fmt.Errorf("operation: %w", err)`
+- Context propagation for cancellation
+- Table-driven tests with `testify/assert`
+
+### Python Projects (dnet)
+- Uses `uv` for package management
+- Pre-commit hooks for linting (ruff) and type checking (mypy)
+- Protobuf for gRPC communication
+
+### TypeScript/Svelte Projects (CortexWorkshop, Lingo)
+- Svelte 5 runes ($state, $derived, $props, $effect)
+- Tauri for desktop apps: Rust backend + SvelteKit frontend
+- camelCase in JS, snake_case in Rust (Tauri auto-converts params)
+
+### Wails Apps (CortexAvatar)
+- `wails dev` for hot-reload development
+- Frontend in `frontend/` (Svelte or React)
+- Backend bindings via Go methods
+
+---
+
+## Enforcement
+
+These rules are enforced through:
+1. **Pre-commit hooks** - Linting and formatting checks
+2. **CI/CD pipelines** - Test coverage requirements
+3. **Code review** - Manual verification of standards compliance
+4. **Claude Code** - AI assistant validates against these rules
+
+**Last Updated:** 2026-01-11

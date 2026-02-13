@@ -1,0 +1,43 @@
+{
+  "name": "cortex-evaluator-frontend-DEPRECATED",
+  "version": "1.0.0",
+  "description": "DEPRECATED - Use cmd/webui instead. This React frontend is no longer maintained.",
+  "deprecated": "Use the embedded Go webui at cmd/webui/ instead",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.22.0",
+    "zustand": "^4.5.2",
+    "@xyflow/react": "^12.0.0",
+    "axios": "^1.7.9",
+    "clsx": "^2.1.0",
+    "date-fns": "^3.3.1",
+    "lucide-react": "^0.330.0",
+    "react-markdown": "^9.0.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/react-syntax-highlighter": "^15.5.11",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.5"
+  }
+}

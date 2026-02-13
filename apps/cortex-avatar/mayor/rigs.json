@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "rigs": {
+    "cortex_avatar": {
+      "git_url": "/Users/normanking/ServerProjectsMac/Development/cortex-avatar",
+      "added_at": "2026-01-16T10:31:53.885001-05:00",
+      "beads": {
+        "repo": "",
+        "prefix": "ca"
+      }
+    }
+  }
+}

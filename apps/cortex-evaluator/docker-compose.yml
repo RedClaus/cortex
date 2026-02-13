@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: cortex-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cortex}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cortex}
+      POSTGRES_DB: ${POSTGRES_DB:-cortex_evaluator}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cortex}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cortex-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: cortex-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-cortex}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - cortex-network
+    restart: unless-stopped
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: cortex-chromadb
+    environment:
+      CHROMA_SERVER_AUTH_CREDENTIALS: ${CHROMA_AUTH_TOKEN:-cortex-token}
+      CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER: chromadb.auth.token.TokenAuthServerProvider
+      CHROMA_SERVER_AUTH_CREDENTIALS_FILE: /chroma/auth.txt
+      ANONYMIZED_TELEMETRY: ${CHROMA_TELEMETRY:-False}
+    volumes:
+      - chroma_data:/chroma/chroma
+      - ./chroma_auth.txt:/chroma/auth.txt:ro
+    ports:
+      - "${CHROMA_PORT:-8001}:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "chroma --help > /dev/null 2>&1 || exit 0"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - cortex-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cortex-backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://cortex:cortex@postgres:5432/cortex_evaluator}
+      REDIS_URL: ${REDIS_URL:-redis://:cortex@redis:6379}
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8000
+      CHROMA_PATH: /app/data/chroma
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      GITHUB_API_TOKEN: ${GITHUB_API_TOKEN}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - backend_data:/app/data
+      - ./backend:/app:ro
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - cortex-network
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: cortex-frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+      VITE_API_KEY: ${VITE_API_KEY}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT:-3000}:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - cortex-network
+    restart: on-failure
+
+networks:
+  cortex-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  chroma_data:
+    driver: local
+  backend_data:
+    driver: local

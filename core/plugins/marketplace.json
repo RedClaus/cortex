@@ -1,0 +1,79 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-02-10",
+  "description": "CortexBrain Plugin Marketplace - Official Registry",
+  "registry_url": "https://raw.githubusercontent.com/RedClaus/CortexBrain/main/plugins/marketplace.json",
+
+  "categories": {
+    "hardware-design": {
+      "name": "Hardware Design",
+      "description": "RTL, FPGA, ASIC, and hardware development",
+      "icon": "cpu"
+    },
+    "code-generation": {
+      "name": "Code Generation",
+      "description": "Source code and boilerplate generation",
+      "icon": "code"
+    },
+    "ai-enhancement": {
+      "name": "AI Enhancement",
+      "description": "Machine learning and AI capabilities",
+      "icon": "brain"
+    },
+    "voice": {
+      "name": "Voice Processing",
+      "description": "Speech recognition and synthesis",
+      "icon": "mic"
+    },
+    "vision": {
+      "name": "Vision & Video",
+      "description": "Image and video processing",
+      "icon": "eye"
+    },
+    "testing": {
+      "name": "Testing",
+      "description": "Test generation and automation",
+      "icon": "check"
+    },
+    "integration": {
+      "name": "Integration",
+      "description": "External service connectors",
+      "icon": "plug"
+    }
+  },
+
+  "plugins": [
+    {
+      "name": "gateflow",
+      "version": "1.5.0",
+      "description": "AI-powered SystemVerilog development assistant with lint fixing, code generation, simulation, and waveform analysis",
+      "author": "codejunkie99",
+      "repository": "https://github.com/codejunkie99/Gateflow-Plugin",
+      "categories": ["hardware-design", "code-generation", "testing"],
+      "keywords": ["systemverilog", "verilog", "hdl", "rtl", "fpga", "asic", "lint", "verilator", "testbench"],
+      "license": "BSL-1.1",
+      "stars": 0,
+      "downloads": 1,
+      "verified": true,
+      "featured": true,
+      "agents": ["sv-codegen", "sv-testbench", "sv-debug", "sv-verification", "sv-understanding", "sv-planner", "sv-refactor", "sv-developer", "sv-viz", "sv-tutor", "sv-orchestrator"],
+      "skills": ["gf", "gf-plan", "gf-build", "gf-architect", "gf-lint", "gf-sim", "gf-expand", "gf-viz", "gf-learn", "gf-router", "gf-summary", "tb-best-practices"],
+      "commands": ["gf-doctor", "gf-scan", "gf-map", "gf-lint", "gf-sim", "gf-gen", "gf-fix"]
+    }
+  ],
+
+  "featured": ["gateflow"],
+
+  "sources": [
+    {
+      "name": "official",
+      "url": "https://raw.githubusercontent.com/RedClaus/CortexBrain/main/plugins/marketplace.json",
+      "priority": 1
+    },
+    {
+      "name": "community",
+      "url": "https://raw.githubusercontent.com/cortex-plugins/registry/main/marketplace.json",
+      "priority": 2
+    }
+  ]
+}

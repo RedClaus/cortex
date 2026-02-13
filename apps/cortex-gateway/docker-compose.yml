@@ -1,0 +1,75 @@
+services:
+  cortex-gateway:
+    build: .
+    container_name: cortex-gateway
+    ports:
+      - "18800:18800"
+      - "18793:18793"
+    volumes:
+      - gateway-data:/app/data
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - CORTEXBRAIN_URL=http://cortexbrain:18892
+      - OLLAMA_URL=http://host.docker.internal:11434
+      - GATEWAY_PORT=18800
+    restart: unless-stopped
+    depends_on:
+      cortexbrain:
+        condition: service_healthy
+    networks:
+      - cortex-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:18800/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  cortexbrain:
+    image: cortexbrain:latest
+    container_name: cortexbrain
+    ports:
+      - "18892:18892"
+    volumes:
+      - cortexbrain-data:/app/data
+    environment:
+      - OLLAMA_URL=http://host.docker.internal:11434
+    restart: unless-stopped
+    networks:
+      - cortex-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:18892/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    container_name: cortex-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - cortex-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  gateway-data:
+  cortexbrain-data:
+  redis-data:
+
+networks:
+  cortex-net:
+    driver: bridge

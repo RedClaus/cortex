@@ -1,0 +1,74 @@
+# Pinky AI Agent Gateway - System-Level systemd Service
+#
+# This is for running Pinky as a system service (e.g., on a server).
+# For personal use, prefer the user-level service (pinky.service).
+#
+# Installation:
+#   1. Create pinky user: sudo useradd -r -s /bin/false pinky
+#   2. Copy binary: sudo cp pinky /usr/local/bin/
+#   3. Create config: sudo mkdir -p /etc/pinky && sudo cp config.yaml /etc/pinky/
+#   4. Install service: sudo cp pinky-system.service /etc/systemd/system/pinky.service
+#   5. Reload: sudo systemctl daemon-reload
+#   6. Enable: sudo systemctl enable pinky
+#   7. Start: sudo systemctl start pinky
+
+[Unit]
+Description=Pinky AI Agent Gateway
+Documentation=https://github.com/normanking/pinky
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pinky
+Group=pinky
+
+ExecStart=/usr/local/bin/pinky --config /etc/pinky/config.yaml
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=30
+TimeoutStopSec=30
+
+# Working directory for tool execution
+WorkingDirectory=/var/lib/pinky
+
+# Environment configuration
+EnvironmentFile=-/etc/pinky/env
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pinky
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+PrivateDevices=true
+ProtectHostname=true
+ProtectClock=true
+ProtectKernelLogs=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+
+# Allow network access
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+# Allow read-write to specific paths
+ReadWritePaths=/var/lib/pinky
+
+# Capability restrictions
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

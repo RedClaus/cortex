@@ -1,0 +1,5 @@
+{
+  "name": "Nexus SDLC: AI Orchestrator",
+  "description": "A high-performance command center for managing multiple AI coding sessions (Gemini, Claude, OpenCode) across the software development lifecycle. Features automated diagnostics, project environment management, and 'Brain' A2A session persistence.",
+  "requestFramePermissions": []
+}

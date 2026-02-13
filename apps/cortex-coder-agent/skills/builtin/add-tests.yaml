@@ -1,0 +1,35 @@
+name: add-tests
+description: Generate unit tests for the selected code
+version: "1.0.0"
+category: testing
+author: Cortex Coder Agent
+triggers:
+  - type: selection
+  - type: command
+    command: test
+  - type: file
+    extensions:
+      - go
+      - py
+      - js
+      - ts
+template: |
+  Generate comprehensive unit tests for the following {{.Language}} code:
+
+  ```{{.Language}}
+  {{.Selection}}
+  ```
+
+  **File:** {{.FilePath}}
+  {{if .FunctionName}}**Function:** {{.FunctionName}}{{end}}
+  {{if .ClassName}}**Class:** {{.ClassName}}{{end}}
+
+  Please generate tests that cover:
+  1. Normal/happy path cases
+  2. Edge cases and boundary conditions
+  3. Error cases
+  4. Any important state changes
+
+  Use {{if eq .Language "go"}}Go's testing package{{else if eq .Language "python"}}pytest{{else if or (eq .Language "javascript") (eq .Language "typescript")}}Jest{{else}}appropriate testing framework for {{.Language}}{{end}}.
+
+  Include brief comments explaining what each test verifies.

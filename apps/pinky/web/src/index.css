@@ -1,0 +1,200 @@
+/* Pinky WebUI - Studio Ghibli Inspired Theme */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap');
+
+/* Dark Theme (Twilight Ghibli - Howl's Castle Evening) */
+:root, [data-theme="dark"] {
+  /* Core palette - Deep twilight blues */
+  --void: #1a2744;
+  --surface: #243352;
+  --surface-elevated: #2d4066;
+  --surface-highlight: #3a5080;
+
+  /* Ghibli accent colors */
+  --amber: #f4a582;          /* Sunset coral */
+  --amber-dim: #d98f70;
+  --amber-glow: rgba(244, 165, 130, 0.2);
+  --green: #7ab87a;          /* Totoro forest green */
+  --green-dim: #5a9e5a;
+  --green-glow: rgba(122, 184, 122, 0.2);
+  --cyan: #87ceeb;           /* Laputa sky blue */
+  --cyan-glow: rgba(135, 206, 235, 0.15);
+  --red: #e88080;            /* Soft Chihiro pink-red */
+  --red-glow: rgba(232, 128, 128, 0.2);
+
+  /* Text hierarchy */
+  --text-primary: #f5f0e6;   /* Warm cream */
+  --text-secondary: #c4bfb3;
+  --text-muted: #8a8578;
+
+  /* Borders and dividers */
+  --border: rgba(255, 248, 231, 0.12);
+  --border-accent: rgba(244, 165, 130, 0.4);
+
+  /* Ghibli glow - disabled scanlines */
+  --crt-opacity: 0;
+}
+
+/* Light Theme (Countryside Ghibli - Totoro Daytime) */
+[data-theme="light"] {
+  /* Core palette - Warm cream and ivory */
+  --void: #faf6eb;           /* Soft parchment */
+  --surface: #fff8e7;        /* Warm cream */
+  --surface-elevated: #f5edd8;
+  --surface-highlight: #ebe3ce;
+
+  /* Ghibli accent colors - earthier for light mode */
+  --amber: #c67b4e;          /* Terracotta */
+  --amber-dim: #a66840;
+  --amber-glow: rgba(198, 123, 78, 0.15);
+  --green: #4a7c59;          /* Forest moss */
+  --green-dim: #3a6347;
+  --green-glow: rgba(74, 124, 89, 0.15);
+  --cyan: #5b9bd5;           /* Kiki's sky */
+  --cyan-glow: rgba(91, 155, 213, 0.12);
+  --red: #c96868;            /* Soft rose */
+  --red-glow: rgba(201, 104, 104, 0.15);
+
+  /* Text hierarchy */
+  --text-primary: #3d3629;   /* Warm brown-black */
+  --text-secondary: #6b6152;
+  --text-muted: #a09686;
+
+  /* Borders and dividers */
+  --border: rgba(61, 54, 41, 0.12);
+  --border-accent: rgba(198, 123, 78, 0.35);
+
+  /* No scanlines for light mode */
+  --crt-opacity: 0;
+}
+
+:root {
+  /* Typography - Soft, friendly Ghibli fonts */
+  --font-mono: 'Quicksand', 'Nunito', -apple-system, sans-serif;
+  --font-display: 'Nunito', 'Quicksand', -apple-system, sans-serif;
+
+  /* Spacing */
+  --gap-xs: 4px;
+  --gap-sm: 8px;
+  --gap-md: 16px;
+  --gap-lg: 24px;
+  --gap-xl: 32px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--void);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle paper texture overlay - Ghibli hand-painted feel */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--amber-dim);
+}
+
+/* Selection */
+::selection {
+  background: var(--amber);
+  color: var(--void);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 1px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* Keyframes */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Button base */
+button {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  transition: var(--transition-fast);
+}
+
+/* Input base */
+input, textarea {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: var(--gap-sm) var(--gap-md);
+  border-radius: 4px;
+  transition: var(--transition-fast);
+}
+
+input:focus, textarea:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-glow);
+}

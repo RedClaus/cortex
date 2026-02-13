@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  pinky:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+        COMMIT: ${COMMIT:-unknown}
+    image: pinky:${VERSION:-latest}
+    container_name: pinky
+    restart: unless-stopped
+    ports:
+      - "18800:18800"  # API server
+      - "18801:18801"  # WebUI
+    environment:
+      - PINKY_BRAIN_MODE=${PINKY_BRAIN_MODE:-embedded}
+      - PINKY_BRAIN_REMOTE_URL=${PINKY_BRAIN_REMOTE_URL:-}
+      - PINKY_SERVER_HOST=0.0.0.0
+      - PINKY_SERVER_PORT=18800
+      - PINKY_SERVER_WEBUI_PORT=18801
+      - PINKY_PERMISSIONS_DEFAULT_TIER=${PINKY_PERMISSIONS_DEFAULT_TIER:-some}
+      - PINKY_PERSONA_DEFAULT=${PINKY_PERSONA_DEFAULT:-professional}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN:-}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN:-}
+    volumes:
+      - pinky-data:/home/nonroot/.pinky
+    healthcheck:
+      test: ["CMD", "/pinky", "--health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  pinky-data:
+    driver: local

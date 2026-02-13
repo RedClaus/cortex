@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Pinky AI Agent Gateway - macOS LaunchAgent
+
+  This runs Pinky when the user logs in (recommended for personal use).
+
+  Installation:
+    1. Copy to LaunchAgents:
+       cp com.pinky.agent.plist ~/Library/LaunchAgents/
+
+    2. Load the agent:
+       launchctl load ~/Library/LaunchAgents/com.pinky.agent.plist
+
+    3. Start immediately (optional):
+       launchctl start com.pinky.agent
+
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.pinky.agent.plist
+    rm ~/Library/LaunchAgents/com.pinky.agent.plist
+
+  View logs:
+    tail -f ~/.pinky/logs/pinky.log
+    tail -f ~/.pinky/logs/pinky-error.log
+
+  Check status:
+    launchctl list | grep pinky
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.pinky.agent</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/pinky</string>
+    </array>
+
+    <!-- Start when user logs in -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart if it crashes -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <!-- Wait before restarting after failure -->
+    <key>ThrottleInterval</key>
+    <integer>5</integer>
+
+    <!-- Working directory -->
+    <key>WorkingDirectory</key>
+    <string>/Users/REPLACE_WITH_USERNAME</string>
+
+    <!-- Environment variables -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/REPLACE_WITH_USERNAME</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <!-- Add your API tokens here or use a separate env file -->
+        <!-- <key>OPENAI_API_KEY</key> -->
+        <!-- <string>your-key-here</string> -->
+    </dict>
+
+    <!-- Logging -->
+    <key>StandardOutPath</key>
+    <string>/Users/REPLACE_WITH_USERNAME/.pinky/logs/pinky.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/REPLACE_WITH_USERNAME/.pinky/logs/pinky-error.log</string>
+
+    <!-- Nice level (optional, lower priority) -->
+    <key>Nice</key>
+    <integer>5</integer>
+
+    <!-- Process type for better macOS integration -->
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

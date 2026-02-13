@@ -1,0 +1,89 @@
+{
+  "items": [
+    {
+      "name": "Setup Dev Environment",
+      "command": "~/scripts/setup-dev.sh",
+      "category": "Development"
+    },
+    {
+      "name": "Sync Files",
+      "command": "~/scripts/sync.sh",
+      "category": "Sync"
+    },
+    {
+      "name": "Launch Nor-X",
+      "command": "open -a 'Nor-X'",
+      "category": "Apps"
+    },
+    {
+      "name": "Open Terminal",
+      "command": "open -n -a Terminal",
+      "category": "Apps"
+    },
+    {
+      "name": "Open VS Code",
+      "command": "open -a 'Visual Studio Code'",
+      "category": "Apps"
+    },
+    {
+      "name": "Open Finder at Projects",
+      "command": "open ~/ServerProjectsMac",
+      "category": "Quick Access"
+    },
+    {
+      "name": "Show IP Address",
+      "command": "osascript -e 'display notification \"'$(ipconfig getifaddr en0)'\" with title \"IP Address\"'",
+      "category": "Utilities"
+    },
+    {
+      "name": "Killallapps",
+      "command": "/Users/normanking/bin/killallapps",
+      "category": "Scripts"
+    },
+    {
+      "name": "Devmenu",
+      "command": "/Users/normanking/.local/bin/devmenu",
+      "category": "Scripts"
+    },
+    {
+      "name": "Connect to Harold (Mac mini)",
+      "command": "open 'vnc://HaroldBot:Zer0k1ng!@192.168.1.229'",
+      "category": "Remote Access"
+    },
+    {
+      "name": "Connect to Ubuntu",
+      "command": "ssh ubuntu@ubuntu-server",
+      "category": "Remote Access"
+    },
+    {
+      "name": "VNC to Ubuntu",
+      "command": "open 'vnc://ubuntu-server:5901'",
+      "category": "Remote Access"
+    },
+    {
+      "name": "Connect to Skippy",
+      "command": "ssh user@skippy",
+      "category": "Remote Access"
+    },
+    {
+      "name": "VNC to Skippy",
+      "command": "open 'vnc://skippy:5901'",
+      "category": "Remote Access"
+    },
+    {
+      "name": "Connect to RedBar0n",
+      "command": "ssh user@redbar0n",
+      "category": "Remote Access"
+    },
+    {
+      "name": "VNC to RedBar0n",
+      "command": "open 'vnc://redbar0n:5901'",
+      "category": "Remote Access"
+    }
+  ],
+  "scanPaths": [
+    "~/scripts",
+    "~/bin",
+    "~/.local/bin"
+  ]
+}

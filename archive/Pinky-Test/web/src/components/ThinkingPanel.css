@@ -1,0 +1,173 @@
+/* ThinkingPanel Component */
+
+.thinking-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border);
+  min-height: 200px;
+}
+
+.thinking-panel .panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap-md);
+  background: linear-gradient(
+    180deg,
+    var(--surface-highlight) 0%,
+    var(--surface-elevated) 100%
+  );
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.thinking-panel .panel-content {
+  flex: 1;
+  padding: var(--gap-md);
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Empty state */
+.thinking-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-brain {
+  margin-bottom: var(--gap-md);
+  opacity: 0.3;
+  color: var(--amber);
+}
+
+.thinking-empty p {
+  font-size: 12px;
+  margin-bottom: var(--gap-xs);
+}
+
+.thinking-empty span {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* Thinking steps */
+.thinking-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+
+.thinking-step {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm);
+  border-radius: 6px;
+  animation: fadeIn 0.3s ease forwards;
+  opacity: 0;
+}
+
+.thinking-step.active {
+  background: var(--amber-glow);
+  border: 1px solid var(--border-accent);
+}
+
+.thinking-step.completed {
+  opacity: 0.7;
+}
+
+.step-indicator {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.thinking-step.completed .step-indicator {
+  color: var(--green);
+}
+
+.thinking-step.active .step-indicator {
+  color: var(--amber);
+}
+
+.thinking-step.failed .step-indicator {
+  color: var(--red);
+}
+
+.step-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.step-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.thinking-step.active .step-text {
+  color: var(--amber);
+  font-weight: 500;
+}
+
+.thinking-step.completed .step-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--text-muted);
+}
+
+/* Neural activity visualization */
+.neural-activity {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--gap-md);
+  pointer-events: none;
+}
+
+.neural-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap-sm);
+}
+
+.neural-node {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--amber);
+  opacity: 0.1;
+  transition: opacity 0.3s ease;
+}
+
+.neural-node.active {
+  animation: pulse-glow 2s infinite;
+}

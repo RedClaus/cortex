@@ -1,0 +1,160 @@
+---
+title: Factory Droid Agent
+description: Run Factory Droid CLI (droid) as an autonomous agent in Ralph TUI.
+---
+
+## Factory Droid Agent
+
+The Factory Droid agent plugin integrates with the `droid` CLI so Ralph TUI can execute tasks with Factory Droid alongside Claude Code and OpenCode.
+
+<Callout type="tip">
+Factory Droid supports subagent tracing via JSONL stream output. Enable tracing to view tool calls, costs, and execution events.
+</Callout>
+
+## Prerequisites
+
+Install the Factory Droid CLI and authenticate:
+
+```bash
+# Install droid and ensure it is on your PATH
+# (Follow Factory Droid installation instructions)
+
+droid --version
+```
+
+Set `FACTORY_API_KEY` in your environment (or run `droid auth`).
+
+## Basic Usage
+
+<Steps>
+  <Step title="Run with Factory Droid">
+    Use the `--agent droid` flag:
+
+    ```bash
+    ralph-tui run --prd ./prd.json --agent droid
+    ```
+  </Step>
+</Steps>
+
+## Configuration
+
+### Shorthand Config
+
+Basic configuration:
+
+```toml
+# .ralph-tui/config.toml
+agent = "droid"
+
+[agentOptions]
+model = "claude-opus-4-5-20251101"
+reasoningEffort = "medium"
+enableTracing = true
+```
+
+### Full Config
+
+For advanced control:
+
+```toml
+[[agents]]
+name = "droid"
+plugin = "droid"
+default = true
+
+[agents.options]
+model = "claude-opus-4-5-20251101"
+reasoningEffort = "high"
+enableTracing = true
+```
+
+### Options Reference
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `model` | string | - | Model name passed to the droid CLI via `--model` |
+| `reasoningEffort` | `low` \| `medium` \| `high` | - | Reasoning effort level passed via `--reasoning-effort` |
+| `enableTracing` | boolean | `true` | Enables JSONL stream output (`--output-format stream-json`) |
+
+## Models and Reasoning Effort
+
+Factory Droid supports passing a model name and reasoning effort level. Configure via `agentOptions` and refer to the official list of available models:
+
+- **[Factory Droid available models](https://docs.factory.ai/reference/cli-reference#available-models)**
+
+```toml
+[agentOptions]
+model = "claude-opus-4-5-20251101"
+reasoningEffort = "high"
+```
+
+## Subagent Tracing
+
+When `enableTracing = true` and subagent tracing is enabled in the TUI, Ralph TUI requests JSONL stream output and parses:
+
+- Tool calls and arguments
+- Assistant messages and result events
+- Error/status events
+- Cost metrics (tokens, cache stats, USD)
+
+Toggle tracing in the TUI:
+- Press `t` to cycle tracing detail levels
+- Press `u` to show/hide the tracing panel
+
+<Callout type="info">
+Tracing requires `subagentTracingDetail` to be set above `"off"`.
+</Callout>
+
+## Autonomous Operation
+
+Ralph TUI runs Factory Droid in fully autonomous mode with `--skip-permissions-unsafe`. This is required because ralph-tui cannot relay interactive prompts back to droid.
+
+<Callout type="info">
+Factory Droid will execute tool actions without asking for confirmation. Review tasks carefully before starting execution.
+</Callout>
+
+## How It Works
+
+Ralph TUI builds a command similar to:
+
+```bash
+droid exec \
+  --model claude-opus-4-5-20251101 \
+  --reasoning-effort high \
+  --skip-permissions-unsafe \
+  --output-format stream-json \
+  --cwd /path/to/project \
+  "<prompt>"
+```
+
+Key behaviors:
+1. **Non-interactive mode**: Uses `droid exec` subcommand with prompt as argument
+2. **Tracing**: `--output-format stream-json` when tracing is enabled
+3. **Working directory**: `--cwd` set to the current task workspace
+
+## Troubleshooting
+
+### "droid CLI not found"
+
+Ensure `droid` is installed and in your PATH:
+
+```bash
+which droid
+# Should output: /path/to/droid
+```
+
+### "Authentication failed"
+
+Set `FACTORY_API_KEY` or run `droid auth`.
+
+### "Tracing not showing"
+
+1. Ensure `enableTracing = true`
+2. Ensure `subagentTracingDetail` is not `"off"`
+3. Press `u` to show the tracing panel
+
+## Next Steps
+
+- **[Claude Code Agent](/docs/plugins/agents/claude)** - Anthropic-specific agent with tracing
+- **[OpenCode Agent](/docs/plugins/agents/opencode)** - Multi-provider agent
+- **[Configuration](/docs/configuration/options)** - Full options reference

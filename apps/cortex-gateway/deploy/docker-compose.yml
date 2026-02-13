@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  cortex-gateway:
+    build: .
+    ports:
+      - "18800:18800"
+    depends_on:
+      cortex-brain:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - CORTEXBRAIN_URL=http://cortex-brain:18892
+      - OLLAMA_URL=http://ollama:11434
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:18800/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - cortex-net
+
+  cortex-brain:
+    image: cortex-brain:latest
+    ports:
+      - "18892:18892"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:18892/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - cortex-net
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - cortex-net
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - cortex-net
+
+volumes:
+  ollama_data:
+  redis_data:
+
+networks:
+  cortex-net:

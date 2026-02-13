@@ -1,0 +1,383 @@
+{
+  "name": "Cortex Evaluator",
+  "description": "A standalone brainstorming and planning tool that integrates with Cortex-03 memory. Enables users to create persistent brainstorming sessions, analyze codebases with AI assistance, generate PRDs and Change Requests, and monitor code execution progress in real-time.",
+  "branchName": "cortex-evaluator",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Session Management - Create Session",
+      "description": "As a user, I need to create a new brainstorming session with a name and target project folder.",
+      "acceptanceCriteria": [
+        "User can create a new session with a name and target project folder",
+        "Session struct exists with ID, Name, ProjectPath, CreatedAt, UpdatedAt fields",
+        "NewSession() constructor initializes session with UUID",
+        "go build ./... passes without errors",
+        "go test ./internal/session/... passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Foundation for REQ-001. Session is the core unit of work.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-002",
+      "title": "Session Management - Resume Session",
+      "description": "As a user, I need to resume any previous session with full context restored.",
+      "acceptanceCriteria": [
+        "ListSessions() returns all saved sessions",
+        "LoadSession(id) restores session with full state",
+        "Sessions persist across application restarts",
+        "go test ./internal/session/... passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Sessions must survive restarts via file or SQLite persistence.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-003",
+      "title": "Session Management - Archive Session",
+      "description": "As a user, I need to archive completed sessions to keep my workspace clean.",
+      "acceptanceCriteria": [
+        "ArchiveSession(id) marks session as archived",
+        "Archived sessions are excluded from default listing",
+        "ListSessions(includeArchived=true) shows all sessions",
+        "go test ./internal/session/... passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Archiving is soft-delete, not permanent removal.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-004",
+      "title": "Session Persistence - SQLite Store",
+      "description": "As a developer, I need sessions to persist to SQLite so state survives restarts.",
+      "acceptanceCriteria": [
+        "SessionStore interface with Save(), Load(), List(), Archive() methods",
+        "SQLiteSessionStore implementation",
+        "Database schema for sessions table",
+        "Migration creates tables if not exist",
+        "Integration test verifies round-trip persistence",
+        "go test ./internal/session/... passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Use ~/.cortex-evaluator/sessions.db or similar path.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-005",
+      "title": "Project Indexer - Scan Directory",
+      "description": "As a user, I need the system to scan and index my project folder.",
+      "acceptanceCriteria": [
+        "IndexProject(path) scans directory recursively",
+        "Respects .gitignore patterns",
+        "Creates file manifest with path, size, type",
+        "Progress callback reports indexing status",
+        "go build ./internal/indexer/... passes",
+        "go test ./internal/indexer/... passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Foundation for REQ-002. Indexer is key to codebase understanding.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-006",
+      "title": "Project Indexer - File Analysis",
+      "description": "As a user, I need each file analyzed for purpose, protocols, and API structure.",
+      "acceptanceCriteria": [
+        "AnalyzeFile() extracts file purpose and key elements",
+        "Detects exports, interfaces, protocols from code",
+        "Creates structured FileAnalysis with metadata",
+        "go test ./internal/indexer/... passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Analysis uses heuristics and optional LLM assistance.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-007",
+      "title": "Project Indexer - Context Generation",
+      "description": "As a user, I need the indexer to generate context.md, todos.md, and insights.md.",
+      "acceptanceCriteria": [
+        "GenerateContext() creates context.md with project overview",
+        "GenerateTodos() creates todos.md from code TODOs and FIXMEs",
+        "GenerateInsights() creates insights.md with iterative learnings",
+        "Files are saved to session folder",
+        "go test ./internal/indexer/... passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "These files enable memory compaction recovery.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-008",
+      "title": "Brainstorm Engine - Q&A Interface",
+      "description": "As a user, I need to ask questions with full codebase context.",
+      "acceptanceCriteria": [
+        "BrainstormEngine struct with Ask(question) method",
+        "Engine has access to indexed codebase context",
+        "Responses include relevant file references",
+        "Conversation history is maintained",
+        "go build ./internal/brainstorm/... passes",
+        "go test ./internal/brainstorm/... passes"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Foundation for REQ-003. Uses Cortex-03 LLM providers.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-009",
+      "title": "Brainstorm Engine - Attachment Support",
+      "description": "As a user, I need to attach files (PDF, TXT, images) to add to context.",
+      "acceptanceCriteria": [
+        "AttachFile(path) adds file to session context",
+        "Supports PDF, TXT, MD, and image files",
+        "Attached files are included in LLM context",
+        "go test ./internal/brainstorm/... passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Attachments expand context beyond codebase.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-010",
+      "title": "Brainstorm Engine - Artifact Saving",
+      "description": "As a user, I need to save artifacts (code, text, diagrams) from responses.",
+      "acceptanceCriteria": [
+        "SaveArtifact(content, name, type) persists to session folder",
+        "Artifacts are tracked in session metadata",
+        "ListArtifacts() returns all saved artifacts",
+        "go test ./internal/brainstorm/... passes"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "Artifacts are valuable outputs worth preserving.",
+      "completionNotes": "Completed by agent"
+    },
+    {
+      "id": "US-011",
+      "title": "PRD Generator - Create PRD",
+      "description": "As a user, I need to generate a PRD from brainstorming session insights.",
+      "acceptanceCriteria": [
+        "GeneratePRD(session) creates PRD struct from session insights",
+        "PRD includes name, description, branchName, userStories",
+        "PRD follows this project's prd.json format",
+        "go build ./internal/prd/... passes",
+        "go test ./internal/prd/... passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Foundation for REQ-004. PRD enables execution via ralph-tui."
+    },
+    {
+      "id": "US-012",
+      "title": "PRD Generator - Save to Project",
+      "description": "As a user, I need to save the PRD to prd.json in the target project folder.",
+      "acceptanceCriteria": [
+        "SavePRD(prd, projectPath) writes to prd.json",
+        "Existing PRD is backed up before overwrite",
+        "PRD save is recorded in session history",
+        "go test ./internal/prd/... passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "PRD file is the handoff to execution systems."
+    },
+    {
+      "id": "US-013",
+      "title": "PRD Generator - Update Existing PRD",
+      "description": "As a user, I need to update an existing PRD with new requirements.",
+      "acceptanceCriteria": [
+        "LoadPRD(projectPath) reads existing prd.json",
+        "MergePRD(existing, new) combines user stories",
+        "Duplicate story IDs are resolved",
+        "go test ./internal/prd/... passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Incremental PRD updates are common workflow."
+    },
+    {
+      "id": "US-014",
+      "title": "Change Request - Generate CR",
+      "description": "As a user, I need to generate Change Requests from PRD requirements.",
+      "acceptanceCriteria": [
+        "GenerateCR(userStory) creates CR struct",
+        "CR includes title, description, acceptance criteria",
+        "CR includes estimated files to modify",
+        "go build ./internal/cr/... passes",
+        "go test ./internal/cr/... passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Foundation for REQ-005. CRs are executable units."
+    },
+    {
+      "id": "US-015",
+      "title": "Change Request - Validate with Claude Code",
+      "description": "As a user, I need to validate CRs with Claude Code before execution.",
+      "acceptanceCriteria": [
+        "ValidateCR(cr) sends CR to Claude Code for review",
+        "Validation returns feasibility assessment",
+        "Issues are reported before execution",
+        "go test ./internal/cr/... passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "Pre-validation catches issues early."
+    },
+    {
+      "id": "US-016",
+      "title": "Execution - Run CR via Claude Code",
+      "description": "As a user, I need to execute CRs via Claude Code CLI.",
+      "acceptanceCriteria": [
+        "ExecuteCR(cr) invokes Claude Code with CR prompt",
+        "Execution runs in subprocess",
+        "Output is captured and streamed",
+        "go build ./internal/progress/... passes",
+        "go test ./internal/progress/... passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "Foundation for REQ-006. Execution is optional."
+    },
+    {
+      "id": "US-017",
+      "title": "Execution - Real-time TODO Monitoring",
+      "description": "As a user, I need to monitor TODO progress during execution.",
+      "acceptanceCriteria": [
+        "MonitorProgress() watches Claude Code output",
+        "Parses TODO status updates from output",
+        "Reports % complete, in-progress, and pending items",
+        "go test ./internal/progress/... passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Progress monitoring provides visibility into execution."
+    },
+    {
+      "id": "US-018",
+      "title": "Execution - Completion Notification",
+      "description": "As a user, I need a notification when CR execution completes.",
+      "acceptanceCriteria": [
+        "Notification banner appears when CR completes",
+        "Banner shows success/failure status",
+        "Summary of changes is displayed",
+        "go test ./internal/progress/... passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "Notifications keep user informed."
+    },
+    {
+      "id": "US-019",
+      "title": "History - Track PRD Operations",
+      "description": "As a user, I need all PRD insertions recorded in history.",
+      "acceptanceCriteria": [
+        "RecordPRDOperation() saves to history store",
+        "History includes timestamp, session, project, operation type",
+        "go build ./internal/history/... passes",
+        "go test ./internal/history/... passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "Foundation for REQ-007. History enables recall."
+    },
+    {
+      "id": "US-020",
+      "title": "History - Track CR Operations",
+      "description": "As a user, I need all CR creations recorded in history.",
+      "acceptanceCriteria": [
+        "RecordCROperation() saves to history store",
+        "History includes timestamp, session, CR details",
+        "go test ./internal/history/... passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": "CR history tracks execution attempts."
+    },
+    {
+      "id": "US-021",
+      "title": "History - Search and Query",
+      "description": "As a user, I need to search history by project, session, or text query.",
+      "acceptanceCriteria": [
+        "SearchHistory(query) performs text search",
+        "FilterByProject(path) filters by project",
+        "FilterBySession(id) filters by session",
+        "Results link back to original sessions",
+        "go test ./internal/history/... passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": "Search makes history useful."
+    },
+    {
+      "id": "US-022",
+      "title": "Cortex Memory - Store Session Summaries",
+      "description": "As a user, I need session summaries stored in Cortex personal memory.",
+      "acceptanceCriteria": [
+        "SyncToMemory(session) creates memory entry",
+        "Summary includes session name, project, key insights",
+        "Uses Cortex-03 memory API",
+        "go build ./internal/memory/... passes",
+        "go test ./internal/memory/... passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": "Foundation for REQ-008. Memory integration is optional."
+    },
+    {
+      "id": "US-023",
+      "title": "Cortex Memory - Recall Sessions",
+      "description": "As a user, I need to recall sessions by querying Cortex brain.",
+      "acceptanceCriteria": [
+        "QueryMemory(query) searches Cortex memory",
+        "Results include session references",
+        "Sessions can be restored from memory references",
+        "go test ./internal/memory/... passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": "Memory recall enables cross-session continuity."
+    },
+    {
+      "id": "US-024",
+      "title": "CLI Entry Point - Main Command",
+      "description": "As a developer, I need a main CLI entry point for the application.",
+      "acceptanceCriteria": [
+        "cmd/evaluator/main.go exists",
+        "Cobra CLI with subcommands: new, resume, list, archive",
+        "Help text explains each command",
+        "go build -o evaluator ./cmd/evaluator passes",
+        "evaluator --help works"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": "CLI is the primary interface for v1."
+    },
+    {
+      "id": "US-025",
+      "title": "CLI - Interactive TUI Mode",
+      "description": "As a user, I need an interactive TUI for brainstorming sessions.",
+      "acceptanceCriteria": [
+        "evaluator tui launches BubbleTea interface",
+        "TUI shows session list, Q&A pane, and status bar",
+        "Keyboard navigation works",
+        "go test ./internal/tui/... passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": "TUI provides rich interactive experience."
+    }
+  ],
+  "metadata": {
+    "updatedAt": "2026-01-17T17:04:33.217Z"
+  }
+}

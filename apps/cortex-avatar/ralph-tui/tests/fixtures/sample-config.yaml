@@ -1,0 +1,52 @@
+# Sample Ralph TUI configuration for testing
+defaultAgent: claude
+defaultTracker: json
+
+maxIterations: 5
+iterationDelay: 1000
+
+outputDir: .ralph-tui/iterations
+progressFile: .ralph-tui/progress.md
+
+agents:
+  - name: claude
+    plugin: claude
+    default: true
+    timeout: 300000
+    options:
+      model: claude-sonnet-4-20250514
+    fallbackAgents:
+      - opencode
+    rateLimitHandling:
+      enabled: true
+      maxRetries: 3
+      baseBackoffMs: 5000
+
+  - name: opencode
+    plugin: opencode
+    options:
+      model: gpt-4o
+
+trackers:
+  - name: json
+    plugin: json
+    default: true
+    options:
+      prdPath: ./prd.json
+
+  - name: beads
+    plugin: beads
+    options:
+      epicId: test-epic
+
+errorHandling:
+  strategy: skip
+  maxRetries: 3
+  retryDelayMs: 5000
+  continueOnNonZeroExit: false
+
+subagentTracingDetail: moderate
+
+notifications:
+  enabled: true
+  sound: off

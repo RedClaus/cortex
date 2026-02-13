@@ -1,0 +1,27 @@
+name: explain-code
+description: Explain the selected code in detail
+version: "1.0.0"
+category: analysis
+author: Cortex Coder Agent
+triggers:
+  - type: selection
+  - type: command
+    command: explain
+template: |
+  Please explain the following {{.Language}} code in detail:
+
+  ```{{.Language}}
+  {{.Selection}}
+  ```
+
+  **File:** {{.FilePath}}
+  **Line:** {{.LineNumber}}
+  {{if .FunctionName}}**Function:** {{.FunctionName}}{{end}}
+  {{if .ClassName}}**Class:** {{.ClassName}}{{end}}
+  {{if .PackageName}}**Package:** {{.PackageName}}{{end}}
+
+  Provide a clear explanation covering:
+  1. What the code does
+  2. How it works
+  3. Any important patterns or idioms used
+  4. Potential edge cases or considerations

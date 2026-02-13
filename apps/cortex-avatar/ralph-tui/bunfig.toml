@@ -1,0 +1,13 @@
+[test]
+# Run tests from src and tests directories
+root = "."
+
+# Coverage settings
+coverage = true
+coverageDir = "./coverage"
+
+# Timeouts
+timeout = 5000
+
+# Parallel execution
+smol = false

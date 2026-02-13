@@ -1,0 +1,11 @@
+{
+  "type": "rig",
+  "version": 1,
+  "name": "cortex_avatar",
+  "git_url": "/Users/normanking/ServerProjectsMac/Development/cortex-avatar",
+  "default_branch": "main",
+  "created_at": "2026-01-16T10:31:40.245892-05:00",
+  "beads": {
+    "prefix": "ca"
+  }
+}

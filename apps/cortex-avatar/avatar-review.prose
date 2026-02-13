@@ -1,0 +1,194 @@
+# Comprehensive Avatar Review
+# Compare cortex-avatar (Wails/Go) vs cortex-avatar-web (Web)
+# Determine best path for fast, realistic 3D avatar with lip-sync
+
+agent analyzer:
+  model: sonnet
+  prompt: "You are a senior software architect analyzing codebases for performance and architecture quality."
+
+agent researcher:
+  model: sonnet
+  prompt: "You are a technology researcher finding best-of-breed solutions for real-time 3D avatars with lip-sync."
+
+# Phase 1: Analyze both codebases in parallel
+parallel:
+  desktop_analysis = session: analyzer
+    prompt: """
+    Analyze the cortex-avatar (Wails/Go desktop) codebase at /Users/normanking/ServerProjectsMac/cortex-avatar
+    
+    Focus on:
+    1. Architecture overview - how does audio/TTS/STT flow work?
+    2. Performance bottlenecks - where is latency introduced?
+    3. Avatar rendering - what technology is used for the avatar?
+    4. Voice pipeline - STT -> Brain -> TTS flow timing
+    5. Current limitations for real-time conversation
+    
+    Read key files: main.go, internal/bridge/audio_bridge.go, internal/a2a/client.go, 
+    internal/tts/, internal/stt/, frontend/src/App.svelte
+    
+    Provide specific findings with file paths and line numbers where relevant.
+    """
+
+  web_analysis = session: analyzer
+    prompt: """
+    Analyze the cortex-avatar-web codebase at /Users/normanking/ServerProjectsMac/cortex-avatar-web
+    
+    Focus on:
+    1. Architecture overview - how does the web avatar work?
+    2. Performance bottlenecks - where is latency introduced?
+    3. Avatar rendering - what 3D/2D technology is used?
+    4. Voice pipeline - STT -> Brain -> TTS flow timing
+    5. Streaming implementation - is it truly streaming or batched?
+    
+    Read key files: src/App.tsx, src/services/a2aClient.ts, src/services/ttsService.ts,
+    src/components/Avatar/, src/hooks/
+    
+    Provide specific findings with file paths and line numbers where relevant.
+    """
+
+# Phase 2: Compare and determine winner
+let comparison = session: analyzer
+  prompt: """
+  Based on the two analyses:
+  
+  Desktop (Wails/Go): {desktop_analysis}
+  
+  Web: {web_analysis}
+  
+  Provide a detailed comparison:
+  1. Which has better architecture for real-time conversation?
+  2. Which has lower latency potential?
+  3. Which is easier to extend with new avatar technology?
+  4. Which handles streaming better?
+  5. VERDICT: Which should we invest in? Or should we start fresh?
+  
+  Be specific about WHY one is better than the other.
+  """
+  context: { desktop_analysis, web_analysis }
+
+# Phase 3: Research best-of-breed avatar technology
+parallel:
+  avatar_tech = session: researcher
+    prompt: """
+    Research the best modern technologies for real-time 3D avatars with:
+    - Photorealistic or high-quality 3D rendering
+    - Real-time lip-sync synchronized with TTS audio
+    - Emotion/expression mapping from text sentiment
+    - Low latency (< 100ms for visual response)
+    - Works in browser OR desktop
+    
+    Consider:
+    - Ready Player Me, Avaturn, or similar avatar platforms
+    - Three.js, Babylon.js, or Unity WebGL for rendering
+    - Viseme-based lip-sync libraries
+    - Audio-reactive animation systems
+    - WebGPU for performance
+    
+    Provide specific recommendations with:
+    - Technology name
+    - GitHub/website links
+    - Integration complexity
+    - Performance characteristics
+    - Cost (free/paid)
+    """
+
+  tts_tech = session: researcher
+    prompt: """
+    Research the fastest, most natural TTS solutions that provide:
+    - Streaming audio output (not wait-for-full-generation)
+    - Viseme/phoneme data for lip-sync
+    - Low latency first-byte (< 200ms)
+    - Natural, expressive voices
+    - Emotion control
+    
+    Consider:
+    - ElevenLabs (streaming + timestamps)
+    - PlayHT 2.0
+    - Cartesia Sonic
+    - OpenAI TTS with word timestamps
+    - XTTS v2 (local)
+    - Coqui TTS
+    
+    Rank by: latency, quality, lip-sync support, cost
+    """
+
+  streaming_tech = session: researcher
+    prompt: """
+    Research how to achieve sub-second end-to-end latency for:
+    User speaks -> STT -> LLM -> TTS -> Avatar speaks
+    
+    Focus on:
+    - Streaming STT (not wait for utterance end)
+    - Streaming LLM responses (token by token)
+    - Streaming TTS (sentence-level or word-level)
+    - Parallel processing opportunities
+    - WebSocket vs SSE vs WebRTC for transport
+    
+    Provide an architecture diagram (ASCII) for the optimal pipeline.
+    """
+
+# Phase 4: Determine if CortexBrain needs changes
+let brain_assessment = session: analyzer
+  prompt: """
+  Based on the streaming research: {streaming_tech}
+  
+  And the current avatar analyses: {comparison}
+  
+  Does CortexBrain (cortex-02) need fundamental changes to support real-time conversation?
+  
+  Check if cortex-02 at /Users/normanking/ServerProjectsMac/cortex-02 supports:
+  1. True streaming responses (SSE/WebSocket token-by-token)
+  2. Low-latency first token
+  3. Sentence-level chunking for TTS
+  
+  If changes are needed, outline what specifically needs to change.
+  If the avatar layer can handle it independently, confirm that.
+  """
+  context: { streaming_tech, comparison }
+
+# Phase 5: Final recommendation
+session: analyzer
+  prompt: """
+  FINAL RECOMMENDATION
+  
+  Based on all research:
+  
+  Codebase Comparison: {comparison}
+  
+  Avatar Technology: {avatar_tech}
+  
+  TTS Technology: {tts_tech}
+  
+  Streaming Architecture: {streaming_tech}
+  
+  Brain Assessment: {brain_assessment}
+  
+  Provide a CONCRETE RECOMMENDATION:
+  
+  1. WINNER: Which avatar codebase to use (or start fresh)?
+  
+  2. AVATAR TECH STACK:
+     - 3D rendering engine
+     - Avatar system/format
+     - Lip-sync solution
+     
+  3. VOICE TECH STACK:
+     - STT provider
+     - TTS provider (with lip-sync data)
+     
+  4. ARCHITECTURE:
+     - How to achieve < 1 second end-to-end latency
+     - ASCII diagram of the flow
+     
+  5. CORTEXBRAIN CHANGES (if any):
+     - What needs to change in cortex-02?
+     - Or confirm avatar layer handles everything
+     
+  6. IMPLEMENTATION PRIORITY:
+     - Phase 1: Quick wins (what can we do today?)
+     - Phase 2: Core infrastructure
+     - Phase 3: Polish and optimization
+  
+  Be specific. Include technology names, GitHub links, and estimated effort.
+  """
+  context: { comparison, avatar_tech, tts_tech, streaming_tech, brain_assessment }

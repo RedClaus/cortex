@@ -1,0 +1,171 @@
+{
+  "branchName": "main",
+  "description": "Desktop companion providing voice, eyes, and ears for CortexBrain. Wails v2 (Go + Svelte) application with animated avatar, voice I/O, and camera/screen capture.",
+  "metadata": {
+    "architecture": {
+      "backend": "Go",
+      "framework": "Wails v2",
+      "frontend": "Svelte",
+      "stt": [
+        "Groq Whisper"
+      ],
+      "tts": [
+        "ElevenLabs",
+        "Piper",
+        "macOS"
+      ]
+    },
+    "changeRequests": [
+      "CR-001"
+    ],
+    "dependencies": {
+      "cortexBrain": {
+        "minVersion": "2.0.0",
+        "requiredCRs": [
+          "CR-093"
+        ]
+      }
+    },
+    "updatedAt": "2026-01-17T00:23:47.287Z"
+  },
+  "name": "CortexAvatar",
+  "userStories": [
+    {
+      "acceptanceCriteria": [
+        "STTFilter struct in internal/stt/filter.go",
+        "Configurable filler word list (um, uh, like, you know, basically)",
+        "Clean() removes filler words from transcript",
+        "Filler-only utterances are not sent to brain",
+        "Unit tests for filler removal",
+        "go test ./internal/stt/... passes"
+      ],
+      "completionNotes": "Completed by agent",
+      "description": "As a voice user, I need filler words filtered from my speech so CortexBrain doesn't process noise.",
+      "id": "US-001",
+      "notes": "CR-001 Phase 1: Stop sending garbage to brain. P0 priority.",
+      "passes": true,
+      "priority": 1,
+      "title": "STT Filter - Filler Word Removal"
+    },
+    {
+      "acceptanceCriteria": [
+        "Fragment buffer with configurable timeout (default 500ms)",
+        "Accumulates short utterances until pause detected",
+        "ShouldSend() returns false for fragments below threshold",
+        "Minimum word count configurable (default 2)",
+        "Unit tests for fragment accumulation",
+        "go test ./internal/stt/... passes"
+      ],
+      "completionNotes": "Completed by agent",
+      "description": "As a voice system, I need to accumulate speech fragments before sending to avoid sending incomplete thoughts.",
+      "id": "US-002",
+      "notes": "CR-001 Phase 1: Reduce STT noise. P1 priority.",
+      "passes": true,
+      "priority": 2,
+      "title": "STT Filter - Fragment Accumulation"
+    },
+    {
+      "acceptanceCriteria": [
+        "SendMessageOptions struct with Mode field",
+        "SendMessageWithOptions() method on A2A client",
+        "Voice mode requests include 'mode': 'voice' in params",
+        "Persona included in request when set",
+        "Backward compatible with existing SendMessage()",
+        "Unit tests for request serialization",
+        "go test ./internal/a2a/... passes"
+      ],
+      "completionNotes": "Completed by agent",
+      "description": "As CortexAvatar, I need to send a 'voice' mode parameter so CortexBrain uses the Voice Executive.",
+      "id": "US-003",
+      "notes": "CR-001 Phase 2: Request optimized responses. P0 priority.",
+      "passes": true,
+      "priority": 3,
+      "title": "Voice Mode A2A - Mode Parameter"
+    },
+    {
+      "acceptanceCriteria": [
+        "Stream field in SendMessageOptions",
+        "A2A client handles SSE streaming responses",
+        "Response chunks delivered via channel",
+        "Proper cleanup on cancel/timeout",
+        "Error handling for stream interruption",
+        "Integration test for streaming flow"
+      ],
+      "completionNotes": "Completed by agent",
+      "description": "As a voice user, I need streaming responses so TTS can start before full response is ready.",
+      "id": "US-004",
+      "notes": "CR-001 Phase 2: Enable streaming. P1 priority.",
+      "passes": true,
+      "priority": 4,
+      "title": "Voice Mode A2A - Streaming Support"
+    },
+    {
+      "acceptanceCriteria": [
+        "StreamingTTS struct in audio bridge",
+        "HandleStreamingResponse() processes chunk channel",
+        "Buffer accumulates chunks until breakpoint",
+        "Concurrent: receive chunks while TTS plays",
+        "Proper cancellation support",
+        "Unit tests for chunk handling"
+      ],
+      "completionNotes": "Completed by agent",
+      "description": "As a voice system, I need to handle streaming response chunks and send to TTS incrementally.",
+      "id": "US-005",
+      "notes": "CR-001 Phase 3: Streaming TTS. P1 priority.",
+      "passes": true,
+      "priority": 5,
+      "title": "Streaming TTS - Chunk Handler"
+    },
+    {
+      "acceptanceCriteria": [
+        "SpeakAtBreakpoint() detects sentence boundaries",
+        "Handles period, question mark, exclamation",
+        "Handles comma with minimum length threshold",
+        "Flush remaining buffer on stream end",
+        "Unit tests for breakpoint detection"
+      ],
+      "completionNotes": "Completed by agent",
+      "description": "As a voice system, I need to detect natural speech breakpoints to send chunks to TTS.",
+      "id": "US-006",
+      "notes": "CR-001 Phase 3: Natural chunking. P2 priority.",
+      "passes": true,
+      "priority": 6,
+      "title": "Streaming TTS - Breakpoint Detection"
+    },
+    {
+      "acceptanceCriteria": [
+        "ConversationManager in internal/voice/conversation.go",
+        "Stores last N exchanges (configurable)",
+        "AddExchange() records user/assistant pairs",
+        "GetContext() returns formatted history",
+        "IsFollowUp() detects references to previous",
+        "Auto-expires after inactivity timeout",
+        "Unit tests for state management"
+      ],
+      "completionNotes": "Completed by agent",
+      "description": "As a voice system, I need to track conversation context for follow-up detection.",
+      "id": "US-007",
+      "notes": "CR-001 Phase 4: Context awareness. P2 priority.",
+      "passes": true,
+      "priority": 7,
+      "title": "Conversation Manager - Context Tracking"
+    },
+    {
+      "acceptanceCriteria": [
+        "VoiceConfig struct with all settings",
+        "Loaded from ~/.cortexavatar/config.yaml",
+        "Default values for all settings",
+        "Settings exposed to frontend via bridge",
+        "Settings UI in Settings panel",
+        "Documentation in README"
+      ],
+      "completionNotes": "Completed by agent",
+      "description": "As a user, I need configurable voice settings in config file.",
+      "id": "US-008",
+      "notes": "CR-001 Phase 5: Configuration. P1 priority.",
+      "passes": true,
+      "priority": 8,
+      "title": "Configuration - Voice Settings"
+    }
+  ]
+}

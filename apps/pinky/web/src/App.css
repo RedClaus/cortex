@@ -1,0 +1,123 @@
+/* Pinky Dashboard Layout */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background: var(--void);
+}
+
+.app-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: linear-gradient(
+    135deg,
+    var(--surface) 0%,
+    var(--void) 50%,
+    var(--surface) 100%
+  );
+}
+
+.right-panels {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  transition: width var(--transition-normal), opacity var(--transition-normal);
+  overflow: hidden;
+}
+
+.right-panels.collapsed {
+  width: 0;
+  opacity: 0;
+  border-left: none;
+}
+
+/* Panel shared styles */
+.panel {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap-md);
+  background: linear-gradient(
+    180deg,
+    var(--surface-highlight) 0%,
+    var(--surface-elevated) 100%
+  );
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.panel-header .indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.panel-header .indicator.active {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green-glow);
+  animation: pulse-glow 2s infinite;
+}
+
+.panel-header .indicator.inactive {
+  background: var(--text-muted);
+}
+
+.panel-header .indicator.warning {
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber-glow);
+}
+
+.panel-content {
+  padding: var(--gap-md);
+  height: calc(100% - 36px);
+  overflow-y: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .right-panels {
+    width: 280px;
+  }
+}
+
+@media (max-width: 900px) {
+  .right-panels {
+    position: fixed;
+    right: 0;
+    top: 48px;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .right-panels.collapsed {
+    transform: translateX(100%);
+    width: 280px;
+    opacity: 1;
+  }
+}

@@ -1,0 +1,60 @@
+# Binaries (built binary, not the source folder)
+/pinky
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+build/
+# Note: dist/ is NOT ignored in internal/webui/ for Go embed
+/dist/
+
+# Logs
+*.log
+logs/
+
+# Runtime
+.runtime/
+.beads/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Config (user-specific)
+# config.yaml  # Uncomment if you want to track config template
+
+# Web build output
+web/dist/
+web/node_modules/
+
+# SQLite databases
+*.db
+*.db-journal
+*.db-shm
+*.db-wal

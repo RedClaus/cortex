@@ -1,0 +1,19 @@
+go 1.25.5
+
+use (
+	// Core engine
+	./core
+
+	// P0/P1 apps
+	./apps/pinky
+	./apps/cortex-gateway
+	./apps/cortex-coder-agent
+	./apps/cortex-avatar
+	./apps/cortex-lab
+	./apps/cortex-key-vault
+
+	// P2/P3 apps
+	./apps/salamander
+	./apps/go-menu
+	./apps/cortex-evaluator
+)

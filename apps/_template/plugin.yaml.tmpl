@@ -1,0 +1,21 @@
+name: APP_NAME
+version: 0.1.0
+description: "TODO: Describe what APP_NAME does"
+author: Norman
+
+capabilities:
+  - a2a-client    # Can call CortexBrain via A2A
+  # - a2a-server  # Uncomment if this app serves A2A requests
+  # - tui         # Uncomment if this app has a terminal UI
+  # - gui         # Uncomment if this app has a graphical UI
+
+dependencies:
+  required:
+    - core        # CortexBrain core library
+  optional: []
+
+cortex_component: ""  # Brain Kernel, AutoLLM, Neural Bus, Knowledge Fabric, etc.
+
+health_check:
+  endpoint: /health
+  interval: 30s

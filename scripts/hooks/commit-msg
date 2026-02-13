@@ -1,0 +1,30 @@
+#!/bin/bash
+# Validate commit message follows Conventional Commits with Cortex scopes
+# Scopes: core, pinky, gateway, coder, avatar, lab, vault, salamander, menu, evaluator, docs, ci, deps
+
+MSG_FILE="$1"
+MSG=$(head -1 "$MSG_FILE")
+
+# Pattern: type(scope): description
+# Types: feat, fix, docs, test, refactor, perf, chore, ci, build, style
+PATTERN='^(feat|fix|docs|test|refactor|perf|chore|ci|build|style)(\((core|pinky|gateway|coder|avatar|lab|vault|salamander|menu|evaluator|docs|ci|deps|infra)\))?!?: .{3,}'
+
+if ! echo "$MSG" | grep -Eq "$PATTERN"; then
+  echo ""
+  echo "❌ Invalid commit message format."
+  echo ""
+  echo "Expected: type(scope): description"
+  echo ""
+  echo "Types:  feat fix docs test refactor perf chore ci build style"
+  echo "Scopes: core pinky gateway coder avatar lab vault salamander menu evaluator docs ci deps infra"
+  echo ""
+  echo "Examples:"
+  echo "  feat(core): add metacognitive self-awareness module"
+  echo "  fix(pinky): resolve Discord webhook timeout"
+  echo "  docs: update migration guide"
+  echo "  refactor(avatar): simplify A2A handshake"
+  echo ""
+  echo "Your message: $MSG"
+  echo ""
+  exit 1
+fi

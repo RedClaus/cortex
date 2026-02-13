@@ -1,0 +1,19 @@
+[Unit]
+Description=Cortex Swarm Dashboard
+After=network.target cortex-gateway.service
+
+[Service]
+Type=simple
+User=norman
+WorkingDirectory=/home/norman/cortex-gateway
+ExecStart=/home/norman/cortex-gateway/swarm-dashboard
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment
+Environment="GATEWAY_URL=http://localhost:8080"
+
+[Install]
+WantedBy=multi-user.target

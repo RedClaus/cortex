@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Pinky AI Agent Gateway - macOS LaunchDaemon
+
+  This runs Pinky at system startup (for servers/shared machines).
+  Requires root privileges to install.
+
+  Installation:
+    1. Create pinky user (optional, for isolation):
+       sudo dscl . -create /Users/pinky
+       sudo dscl . -create /Users/pinky UserShell /usr/bin/false
+       sudo dscl . -create /Users/pinky UniqueID 503
+       sudo dscl . -create /Users/pinky PrimaryGroupID 20
+       sudo dscl . -create /Users/pinky NFSHomeDirectory /var/lib/pinky
+       sudo mkdir -p /var/lib/pinky
+       sudo chown pinky:staff /var/lib/pinky
+
+    2. Copy binary and config:
+       sudo cp pinky /usr/local/bin/
+       sudo mkdir -p /etc/pinky
+       sudo cp config.yaml /etc/pinky/
+
+    3. Install the daemon:
+       sudo cp com.pinky.daemon.plist /Library/LaunchDaemons/
+       sudo chown root:wheel /Library/LaunchDaemons/com.pinky.daemon.plist
+       sudo chmod 644 /Library/LaunchDaemons/com.pinky.daemon.plist
+
+    4. Load the daemon:
+       sudo launchctl load /Library/LaunchDaemons/com.pinky.daemon.plist
+
+  Uninstall:
+    sudo launchctl unload /Library/LaunchDaemons/com.pinky.daemon.plist
+    sudo rm /Library/LaunchDaemons/com.pinky.daemon.plist
+
+  View logs:
+    tail -f /var/log/pinky/pinky.log
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.pinky.daemon</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/pinky</string>
+        <string>--config</string>
+        <string>/etc/pinky/config.yaml</string>
+    </array>
+
+    <!-- Start at system boot -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart policy -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+
+    <!-- Wait before restarting after failure -->
+    <key>ThrottleInterval</key>
+    <integer>5</integer>
+
+    <!-- Run as dedicated user (more secure) -->
+    <key>UserName</key>
+    <string>pinky</string>
+
+    <key>GroupName</key>
+    <string>staff</string>
+
+    <!-- Working directory -->
+    <key>WorkingDirectory</key>
+    <string>/var/lib/pinky</string>
+
+    <!-- Environment variables -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/var/lib/pinky</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <!-- Logging -->
+    <key>StandardOutPath</key>
+    <string>/var/log/pinky/pinky.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/var/log/pinky/pinky-error.log</string>
+
+    <!-- Resource limits -->
+    <key>SoftResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>4096</integer>
+    </dict>
+
+    <key>HardResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>8192</integer>
+    </dict>
+
+    <!-- Process type -->
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <!-- Disable App Nap for consistent performance -->
+    <key>EnablePressuredExit</key>
+    <false/>
+
+    <!-- Start order (wait for network) -->
+    <key>LaunchEvents</key>
+    <dict>
+        <key>com.apple.notifyd.matching</key>
+        <dict>
+            <key>com.apple.system.config.network_change</key>
+            <dict>
+                <key>Notification</key>
+                <string>com.apple.system.config.network_change</string>
+            </dict>
+        </dict>
+    </dict>
+</dict>
+</plist>

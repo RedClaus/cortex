@@ -1,0 +1,843 @@
+# Full Avatar Implementation - Option A
+# Complete real-time 3D avatar with emotions, lip-sync, and streaming
+# Target: Sub-500ms latency, professional-grade conversational AI
+
+agent architect:
+  model: sonnet
+  prompt: "You are a senior software architect implementing production systems. Write clean, well-documented code following existing patterns."
+
+agent frontend:
+  model: sonnet
+  prompt: "You are a frontend engineer expert in Svelte, Three.js, and TypeScript. Write performant, type-safe code."
+
+agent backend:
+  model: sonnet
+  prompt: "You are a Go backend engineer expert in audio processing, streaming APIs, and real-time systems. Write idiomatic Go code."
+
+agent integrator:
+  model: sonnet
+  prompt: "You are a systems integrator who connects components, handles edge cases, and ensures everything works together."
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PHASE 1: FRONTEND - 3D Avatar with TalkingHead
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Step 1.1: Install frontend dependencies
+session: backend
+  prompt: """
+  Install the required npm packages for 3D avatar rendering in the cortex-avatar frontend.
+  
+  Working directory: /Users/normanking/ServerProjectsMac/cortex-avatar/frontend
+  
+  Install these packages:
+  - three (Three.js core)
+  - @pixiv/three-vrm (VRM avatar loading)
+  - @pixiv/three-vrm-animation (VRM animations)
+  
+  Run: cd /Users/normanking/ServerProjectsMac/cortex-avatar/frontend && npm install three @pixiv/three-vrm @pixiv/three-vrm-animation
+  
+  Also install types:
+  npm install -D @types/three
+  
+  Verify installation by checking package.json.
+  """
+
+# Step 1.2: Create TalkingHead avatar controller
+let avatar_controller = session: frontend
+  prompt: """
+  Create a comprehensive TalkingHead-style avatar controller for the Svelte frontend.
+  
+  Location: /Users/normanking/ServerProjectsMac/cortex-avatar/frontend/src/lib/avatar/TalkingHeadController.ts
+  
+  This controller must handle:
+  
+  1. VRM MODEL LOADING:
+     - Load .vrm files using GLTFLoader + VRMLoaderPlugin
+     - Support multiple avatar models (switchable)
+     - Preload common animations
+  
+  2. LIP-SYNC (15 Oculus Visemes):
+     - Map viseme IDs to VRM blend shapes:
+       - viseme_sil (silence) → neutral
+       - viseme_PP (p,b,m) → aa: 0, oh: 0
+       - viseme_FF (f,v) → ih: 0.5
+       - viseme_TH (th) → aa: 0.3
+       - viseme_DD (d,t,n) → aa: 0.4
+       - viseme_kk (k,g) → oh: 0.3
+       - viseme_CH (ch,j,sh) → oh: 0.5
+       - viseme_SS (s,z) → ih: 0.6
+       - viseme_nn (n) → aa: 0.3
+       - viseme_RR (r) → oh: 0.2
+       - viseme_aa (a) → aa: 1.0
+       - viseme_E (e) → ih: 0.8
+       - viseme_ih (i) → ih: 1.0
+       - viseme_oh (o) → oh: 0.8
+       - viseme_ou (u) → ou: 1.0
+     - Smooth interpolation between visemes (lerp factor 0.3)
+     - Support timeline-based playback synced to audio
+  
+  3. EMOTIONS (VRM Expression Mapping):
+     - neutral → all expressions 0
+     - happy → happy: 0.7, aa: 0.1
+     - sad → sad: 0.6
+     - angry → angry: 0.7
+     - surprised → surprised: 0.8
+     - thinking → happy: 0.1, blink: 0.3
+     - excited → happy: 1.0, surprised: 0.3
+     - Smooth transitions between emotions (duration 300ms)
+  
+  4. IDLE ANIMATIONS:
+     - Blinking: Random interval 2-5s, duration 150ms
+     - Head micro-movements: Subtle rotation (±3°) every 2-4s
+     - Breathing: Chest/shoulder subtle movement
+     - Eye look-at: Follow mouse or random gaze shifts
+  
+  5. AUDIO-REACTIVE FALLBACK:
+     - Use Web Audio API AnalyserNode when no viseme data
+     - Map frequency bands to mouth openness
+     - Threshold-based lip movement
+  
+  Create a TypeScript class with these methods:
+  - constructor(container: HTMLElement, options: AvatarOptions)
+  - async loadModel(url: string): Promise<void>
+  - setEmotion(emotion: EmotionType, intensity?: number): void
+  - setViseme(visemeId: number, weight: number): void
+  - playVisemeTimeline(timeline: VisemeEvent[]): void
+  - startAudioReactiveLipSync(audioSource: AudioNode): void
+  - stopLipSync(): void
+  - update(deltaTime: number): void
+  - dispose(): void
+  
+  Include proper TypeScript types for all interfaces.
+  
+  IMPORTANT: Write the complete implementation to the file. Do not just plan - actually create the file.
+  """
+
+# Step 1.3: Create Three.js scene wrapper for Svelte
+let scene_component = session: frontend
+  prompt: """
+  Create a Svelte component that wraps Three.js and integrates the TalkingHeadController.
+  
+  Location: /Users/normanking/ServerProjectsMac/cortex-avatar/frontend/src/lib/avatar/AvatarScene.svelte
+  
+  Requirements:
+  
+  1. THREE.JS SETUP:
+     - Create WebGL renderer with antialiasing
+     - Set up perspective camera (FOV 30°, positioned for head/shoulders view)
+     - Add ambient light (0.6 intensity) and directional light (0.8 intensity)
+     - Handle window resize
+     - 60 FPS render loop using requestAnimationFrame
+  
+  2. SVELTE INTEGRATION:
+     - Props: modelUrl, emotion, isSpeaking, visemeData, audioElement
+     - Reactive updates when props change
+     - Cleanup on component destroy
+     - Dispatch events: 'ready', 'error', 'modelLoaded'
+  
+  3. VISEME HANDLING:
+     - Accept viseme timeline from parent
+     - Sync viseme playback with audio currentTime
+     - Fall back to audio-reactive when no timeline provided
+  
+  4. EMOTION HANDLING:
+     - React to emotion prop changes
+     - Smooth transitions between emotions
+  
+  5. CAMERA CONTROLS (Optional):
+     - Subtle orbit controls for user interaction
+     - Reset to default view button
+  
+  Component structure:
+  ```svelte
+  <script lang="ts">
+    import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+    import { TalkingHeadController } from './TalkingHeadController';
+    // ... implementation
+  </script>
+  
+  <div class="avatar-container" bind:this={container}>
+    <canvas bind:this={canvas}></canvas>
+  </div>
+  
+  <style>
+    .avatar-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  ```
+  
+  IMPORTANT: Write the complete implementation to the file.
+  """
+
+# Step 1.4: Create viseme types and utilities
+let viseme_utils = session: frontend
+  prompt: """
+  Create TypeScript types and utilities for viseme handling.
+  
+  Location: /Users/normanking/ServerProjectsMac/cortex-avatar/frontend/src/lib/avatar/visemes.ts
+  
+  Include:
+  
+  1. OCULUS VISEME ENUM:
+     ```typescript
+     export enum OculusViseme {
+       sil = 0,  // silence
+       PP = 1,   // p, b, m
+       FF = 2,   // f, v
+       TH = 3,   // th
+       DD = 4,   // d, t, n
+       kk = 5,   // k, g
+       CH = 6,   // ch, j, sh
+       SS = 7,   // s, z
+       nn = 8,   // n
+       RR = 9,   // r
+       aa = 10,  // a
+       E = 11,   // e
+       ih = 12,  // i
+       oh = 13,  // o
+       ou = 14   // u
+     }
+     ```
+  
+  2. VISEME EVENT TYPE:
+     ```typescript
+     export interface VisemeEvent {
+       time: number;      // milliseconds from audio start
+       visemeId: OculusViseme;
+       weight: number;    // 0-1
+       duration: number;  // milliseconds
+     }
+     ```
+  
+  3. PHONEME TO VISEME MAPPING:
+     - Map IPA phonemes to Oculus visemes
+     - Handle common phoneme variations
+  
+  4. VRM BLEND SHAPE MAPPING:
+     - Map Oculus visemes to VRM expression names
+     - Include weight multipliers for natural look
+  
+  5. UTILITY FUNCTIONS:
+     - parseVisemeTimeline(json: string): VisemeEvent[]
+     - interpolateVisemes(from: VisemeEvent, to: VisemeEvent, t: number): VisemeWeights
+     - textToApproximateVisemes(text: string): VisemeEvent[] (fallback)
+  
+  IMPORTANT: Write the complete implementation to the file.
+  """
+
+# Step 1.5: Create emotion types and detector
+let emotion_system = session: frontend
+  prompt: """
+  Create emotion types and a simple text-based emotion detector.
+  
+  Location: /Users/normanking/ServerProjectsMac/cortex-avatar/frontend/src/lib/avatar/emotions.ts
+  
+  Include:
+  
+  1. EMOTION TYPES:
+     ```typescript
+     export type EmotionType = 
+       | 'neutral'
+       | 'happy'
+       | 'sad'
+       | 'angry'
+       | 'surprised'
+       | 'thinking'
+       | 'excited'
+       | 'confused';
+     
+     export interface EmotionState {
+       primary: EmotionType;
+       intensity: number;  // 0-1
+       secondary?: EmotionType;
+       secondaryIntensity?: number;
+     }
+     ```
+  
+  2. VRM EXPRESSION MAPPING:
+     ```typescript
+     export const emotionToVRM: Record<EmotionType, VRMExpressionWeights> = {
+       neutral: { happy: 0, sad: 0, angry: 0, surprised: 0 },
+       happy: { happy: 0.7 },
+       sad: { sad: 0.6 },
+       angry: { angry: 0.7 },
+       surprised: { surprised: 0.8 },
+       thinking: { happy: 0.1 },
+       excited: { happy: 1.0, surprised: 0.3 },
+       confused: { surprised: 0.3, sad: 0.2 }
+     };
+     ```
+  
+  3. TEXT EMOTION DETECTOR:
+     - Simple keyword-based detection
+     - Detect: happy (haha, great, awesome, love), sad (sorry, unfortunately), 
+       angry (frustrated, annoying), surprised (wow, oh, amazing), 
+       thinking (hmm, let me think, considering)
+     - Return EmotionState with confidence
+  
+  4. EMOTION TRANSITION:
+     - smoothTransition(from: EmotionState, to: EmotionState, progress: number): EmotionState
+     - Calculate blend between emotions
+  
+  IMPORTANT: Write the complete implementation to the file.
+  """
+
+# Step 1.6: Update main App.svelte to use new avatar
+let app_integration = session: frontend
+  prompt: """
+  Update the main App.svelte to integrate the new 3D avatar system.
+  
+  File: /Users/normanking/ServerProjectsMac/cortex-avatar/frontend/src/App.svelte
+  
+  READ the existing file first, then modify it to:
+  
+  1. IMPORT NEW COMPONENTS:
+     - Import AvatarScene from './lib/avatar/AvatarScene.svelte'
+     - Import emotion detector
+     - Import viseme types
+  
+  2. REPLACE OLD AVATAR:
+     - Remove or keep old Avatar3D as fallback
+     - Add AvatarScene component in main view
+     - Pass required props: modelUrl, emotion, isSpeaking, visemeData
+  
+  3. WIRE UP AUDIO EVENTS:
+     - When TTS audio plays, pass audio element to avatar
+     - When viseme data arrives from backend, pass to avatar
+     - Detect emotion from response text and update avatar
+  
+  4. ADD AVATAR CONTROLS (optional):
+     - Model selector dropdown (if multiple VRM files available)
+     - Emotion override buttons for testing
+  
+  5. HANDLE EVENTS:
+     - Listen for 'ready' event from AvatarScene
+     - Show loading state while model loads
+     - Handle errors gracefully
+  
+  Keep all existing functionality (chat, voice, settings).
+  Only ADD the new avatar integration.
+  
+  IMPORTANT: Read the file first, then write the modified version.
+  """
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PHASE 2: BACKEND - Streaming Infrastructure
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Step 2.1: Add Cartesia TTS provider with viseme support
+let cartesia_tts = session: backend
+  prompt: """
+  Create a Cartesia TTS provider for the Go backend with streaming and viseme support.
+  
+  Location: /Users/normanking/ServerProjectsMac/cortex-avatar/internal/tts/cartesia.go
+  
+  Requirements:
+  
+  1. CARTESIA API INTEGRATION:
+     - WebSocket streaming endpoint: wss://api.cartesia.ai/tts/websocket
+     - Authentication via X-API-Key header
+     - Model: "sonic-2024-10-01" (fastest)
+     - Voice: configurable (default: professional female)
+  
+  2. STREAMING AUDIO:
+     - Send text chunks as they arrive
+     - Receive audio chunks in real-time
+     - Output format: PCM 16-bit, 24kHz
+     - Buffer and emit chunks to frontend
+  
+  3. VISEME GENERATION:
+     - Cartesia doesn't provide native visemes
+     - Use phoneme approximation from text
+     - Generate viseme timeline synced to audio duration
+     - Map English phonemes to Oculus viseme IDs
+  
+  4. PROVIDER INTERFACE:
+     - Implement the existing Provider interface from provider.go
+     - Add new StreamingProvider interface if needed
+  
+  5. CONFIGURATION:
+     - API key from environment: CARTESIA_API_KEY
+     - Voice ID configurable
+     - Speed/pitch adjustable
+  
+  Structure:
+  ```go
+  package tts
+  
+  type CartesiaProvider struct {
+      apiKey    string
+      voiceID   string
+      modelID   string
+      wsConn    *websocket.Conn
+  }
+  
+  type VisemeEvent struct {
+      Time      int    `json:"time"`      // ms
+      VisemeID  int    `json:"visemeId"`
+      Weight    float64 `json:"weight"`
+      Duration  int    `json:"duration"`  // ms
+  }
+  
+  type StreamChunk struct {
+      Audio   []byte        `json:"audio,omitempty"`
+      Visemes []VisemeEvent `json:"visemes,omitempty"`
+      Done    bool          `json:"done"`
+  }
+  
+  func (p *CartesiaProvider) SynthesizeStream(ctx context.Context, text string, onChunk func(StreamChunk)) error
+  ```
+  
+  READ existing TTS providers in internal/tts/ for patterns, then create the new file.
+  
+  IMPORTANT: Write the complete implementation.
+  """
+
+# Step 2.2: Add Deepgram streaming STT provider
+let deepgram_stt = session: backend
+  prompt: """
+  Create a Deepgram streaming STT provider for the Go backend.
+  
+  Location: /Users/normanking/ServerProjectsMac/cortex-avatar/internal/stt/deepgram.go
+  
+  Requirements:
+  
+  1. DEEPGRAM API INTEGRATION:
+     - WebSocket endpoint: wss://api.deepgram.com/v1/listen
+     - Authentication via token in URL or header
+     - Model: "nova-2" (best accuracy/speed)
+  
+  2. STREAMING TRANSCRIPTION:
+     - Send audio chunks as they arrive from mic
+     - Receive interim and final transcripts
+     - Handle utterance end detection
+     - Support barge-in (detect speech during TTS)
+  
+  3. CONFIGURATION:
+     - API key from environment: DEEPGRAM_API_KEY
+     - Language: en-US (configurable)
+     - Features: punctuate, interim_results, utterance_end_ms
+  
+  4. PROVIDER INTERFACE:
+     - Implement existing STT provider interface
+     - Add streaming-specific methods
+  
+  Structure:
+  ```go
+  package stt
+  
+  type DeepgramProvider struct {
+      apiKey   string
+      language string
+      wsConn   *websocket.Conn
+  }
+  
+  type TranscriptEvent struct {
+      Text      string  `json:"text"`
+      IsFinal   bool    `json:"is_final"`
+      Confidence float64 `json:"confidence"`
+  }
+  
+  func (p *DeepgramProvider) StartStream(ctx context.Context, onTranscript func(TranscriptEvent)) error
+  func (p *DeepgramProvider) SendAudio(audio []byte) error
+  func (p *DeepgramProvider) EndStream() error
+  ```
+  
+  READ existing STT providers in internal/stt/ for patterns, then create the new file.
+  
+  IMPORTANT: Write the complete implementation.
+  """
+
+# Step 2.3: Create streaming orchestrator
+let streaming_orchestrator = session: backend
+  prompt: """
+  Create a streaming orchestrator that coordinates STT → LLM → TTS with sentence-level chunking.
+  
+  Location: /Users/normanking/ServerProjectsMac/cortex-avatar/internal/bridge/streaming_orchestrator.go
+  
+  Requirements:
+  
+  1. SENTENCE DETECTION:
+     - Buffer incoming LLM tokens
+     - Detect sentence boundaries (. ! ? and appropriate context)
+     - Don't split on abbreviations (Dr. Mr. etc.)
+     - Emit complete sentences to TTS
+  
+  2. PARALLEL TTS QUEUE:
+     - Queue sentences for TTS as they're detected
+     - Start TTS on first sentence while LLM continues
+     - Manage audio playback queue
+     - Handle interruptions (cancel queue on barge-in)
+  
+  3. VISEME TIMELINE ASSEMBLY:
+     - Collect visemes from TTS provider
+     - Adjust timestamps based on queue position
+     - Emit combined timeline to frontend
+  
+  4. STATE MANAGEMENT:
+     - Track: idle, listening, thinking, speaking
+     - Handle transitions cleanly
+     - Support cancellation at any point
+  
+  5. EVENT EMISSION:
+     - Emit events to frontend via Wails runtime:
+       - "stream:token" - individual LLM tokens for display
+       - "stream:sentence" - complete sentence for TTS
+       - "audio:chunk" - audio data with visemes
+       - "audio:complete" - TTS finished
+       - "state:change" - state transitions
+  
+  Structure:
+  ```go
+  package bridge
+  
+  type StreamingOrchestrator struct {
+      stt        stt.StreamingProvider
+      tts        tts.StreamingProvider
+      a2aClient  *a2a.StreamingClient
+      runtime    *wails.Runtime
+      
+      state      OrchestratorState
+      ttsQueue   chan SentenceJob
+      cancelFunc context.CancelFunc
+  }
+  
+  type SentenceJob struct {
+      Text      string
+      Index     int
+      StartTime time.Time
+  }
+  
+  func (o *StreamingOrchestrator) StartConversation(ctx context.Context) error
+  func (o *StreamingOrchestrator) ProcessUserSpeech(audio []byte) error
+  func (o *StreamingOrchestrator) Cancel() error
+  ```
+  
+  READ existing bridge code in internal/bridge/ for patterns.
+  
+  IMPORTANT: Write the complete implementation.
+  """
+
+# Step 2.4: Update A2A client for streaming
+let a2a_streaming = session: backend
+  prompt: """
+  Update the A2A client to support true streaming from CortexBrain.
+  
+  File: /Users/normanking/ServerProjectsMac/cortex-avatar/internal/a2a/client.go
+  
+  READ the existing file first, then ADD streaming support:
+  
+  1. ADD SSE CLIENT:
+     - New method: SendMessageStream(ctx, text string, onToken func(string)) error
+     - Connect to SSE endpoint on CortexBrain
+     - Parse Server-Sent Events format
+     - Call onToken for each received token
+  
+  2. HANDLE EVENT TYPES:
+     - "token" - partial response token
+     - "sentence" - complete sentence boundary
+     - "done" - generation complete
+     - "error" - handle errors gracefully
+  
+  3. KEEP EXISTING:
+     - Keep SendMessage() for non-streaming fallback
+     - Keep all existing configuration
+  
+  4. CONNECTION MANAGEMENT:
+     - Reuse HTTP client with keep-alive
+     - Handle reconnection on failure
+     - Proper context cancellation
+  
+  Add these methods to existing Client struct:
+  ```go
+  func (c *Client) SendMessageStream(ctx context.Context, text string, onToken func(token string, done bool)) error
+  func (c *Client) SupportsStreaming() bool
+  ```
+  
+  IMPORTANT: Read the existing file, then write the modified version preserving all existing code.
+  """
+
+# Step 2.5: Update audio bridge to use streaming
+let audio_bridge_update = session: backend
+  prompt: """
+  Update the audio bridge to integrate the streaming orchestrator.
+  
+  File: /Users/normanking/ServerProjectsMac/cortex-avatar/internal/bridge/audio_bridge.go
+  
+  READ the existing file first, then ADD:
+  
+  1. STREAMING MODE:
+     - Add streamingEnabled bool config
+     - When enabled, use StreamingOrchestrator
+     - Fall back to existing batch mode when disabled
+  
+  2. VISEME EMISSION:
+     - New method: emitVisemes(timeline []VisemeEvent)
+     - Emit "viseme:timeline" event to frontend
+     - Include audio sync information
+  
+  3. PROVIDER SWITCHING:
+     - Add Cartesia to TTS provider selection
+     - Add Deepgram to STT provider selection
+     - Prefer streaming providers when available
+  
+  4. SENTENCE-LEVEL TTS:
+     - Modify speakText to accept sentence chunks
+     - Queue sentences for sequential playback
+     - Emit audio with viseme data
+  
+  5. BARGE-IN ENHANCEMENT:
+     - Detect speech during TTS
+     - Cancel current TTS queue
+     - Signal streaming orchestrator to stop
+  
+  Keep ALL existing functionality working.
+  Add new streaming capabilities alongside.
+  
+  IMPORTANT: Read the existing file, then write the modified version.
+  """
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PHASE 3: CORTEXBRAIN - Enable Streaming
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Step 3.1: Add streaming to CortexBrain A2A server
+let brain_streaming = session: backend
+  prompt: """
+  Add SSE streaming endpoint to CortexBrain's A2A server.
+  
+  File: /Users/normanking/ServerProjectsMac/cortex-02/internal/a2a/server.go
+  
+  READ the existing file first, then ADD:
+  
+  1. NEW SSE ENDPOINT:
+     - POST /a2a/message/stream
+     - Returns Server-Sent Events
+     - Stream tokens as they're generated
+  
+  2. EVENT FORMAT:
+     ```
+     event: token
+     data: {"text": "Hello"}
+     
+     event: sentence
+     data: {"text": "Hello, how can I help?", "index": 0}
+     
+     event: done
+     data: {"task_id": "xxx"}
+     ```
+  
+  3. WIRE TO ORCHESTRATOR:
+     - Use existing ProcessStream if available
+     - Or wrap Process() with token buffering
+  
+  4. SENTENCE DETECTION:
+     - Buffer tokens until sentence boundary
+     - Emit "sentence" events for TTS optimization
+  
+  Keep existing /a2a/message endpoint working.
+  Add streaming as new capability.
+  
+  IMPORTANT: Read the existing file, then write the modified version.
+  """
+
+# Step 3.2: Add streaming to LLM providers in CortexBrain
+let brain_llm_streaming = session: backend
+  prompt: """
+  Ensure LLM providers in CortexBrain support streaming.
+  
+  Check files in: /Users/normanking/ServerProjectsMac/cortex-02/internal/llm/
+  
+  For each provider file (openai.go, anthropic.go, ollama.go, etc.):
+  
+  1. CHECK if ChatStream() method exists
+  2. If NOT, ADD streaming support:
+     ```go
+     func (p *Provider) ChatStream(ctx context.Context, messages []Message, onToken func(string)) error {
+         // Set stream: true in API request
+         // Parse SSE response
+         // Call onToken for each token
+     }
+     ```
+  
+  3. HANDLE PROVIDER SPECIFICS:
+     - OpenAI: stream: true, parse data: lines
+     - Anthropic: stream: true, parse event: content_block_delta
+     - Ollama: Already streams by default
+     - MLX: Check existing implementation
+  
+  READ each file, check for streaming, add if missing.
+  
+  IMPORTANT: Only modify files that need streaming added.
+  """
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PHASE 4: INTEGRATION & TESTING
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Step 4.1: Create integration tests
+let integration_tests = session: integrator
+  prompt: """
+  Create integration tests for the streaming avatar system.
+  
+  Location: /Users/normanking/ServerProjectsMac/cortex-avatar/internal/bridge/streaming_test.go
+  
+  Test cases:
+  
+  1. VISEME GENERATION:
+     - Test phoneme to viseme mapping
+     - Test timeline generation from text
+     - Test interpolation between visemes
+  
+  2. SENTENCE DETECTION:
+     - Test boundary detection (. ! ?)
+     - Test abbreviation handling (Dr. Mr. etc.)
+     - Test edge cases (URLs, numbers)
+  
+  3. STREAMING FLOW:
+     - Mock STT → verify transcript events
+     - Mock LLM → verify token streaming
+     - Mock TTS → verify audio + viseme output
+  
+  4. END-TO-END:
+     - Test full pipeline with mocks
+     - Verify latency under 500ms
+     - Test cancellation/barge-in
+  
+  IMPORTANT: Write the complete test file.
+  """
+
+# Step 4.2: Update configuration
+let config_update = session: backend
+  prompt: """
+  Update configuration to support new streaming providers.
+  
+  File: /Users/normanking/ServerProjectsMac/cortex-avatar/internal/config/config.go
+  
+  ADD:
+  
+  1. STREAMING CONFIG:
+     ```go
+     type StreamingConfig struct {
+         Enabled     bool   `yaml:"enabled"`
+         STTProvider string `yaml:"stt_provider"` // deepgram, groq
+         TTSProvider string `yaml:"tts_provider"` // cartesia, openai, elevenlabs
+     }
+     ```
+  
+  2. PROVIDER CONFIGS:
+     ```go
+     type CartesiaConfig struct {
+         APIKey  string `yaml:"api_key"`
+         VoiceID string `yaml:"voice_id"`
+         ModelID string `yaml:"model_id"`
+     }
+     
+     type DeepgramConfig struct {
+         APIKey   string `yaml:"api_key"`
+         Language string `yaml:"language"`
+         Model    string `yaml:"model"`
+     }
+     ```
+  
+  3. AVATAR CONFIG:
+     ```go
+     type AvatarConfig struct {
+         ModelURL      string `yaml:"model_url"`
+         DefaultEmotion string `yaml:"default_emotion"`
+         LipSyncMode   string `yaml:"lip_sync_mode"` // viseme, audio-reactive
+     }
+     ```
+  
+  Also update the example config file:
+  /Users/normanking/ServerProjectsMac/cortex-avatar/config.example.yaml
+  
+  IMPORTANT: Read existing config, then add new fields.
+  """
+
+# Step 4.3: Download/verify VRM avatar model
+let avatar_model = session: integrator
+  prompt: """
+  Ensure we have a working VRM avatar model for testing.
+  
+  Check: /Users/normanking/ServerProjectsMac/cortex-avatar/frontend/public/models/
+  
+  1. LIST existing models in that directory
+  
+  2. If no .vrm files exist, provide instructions to get one:
+     - VRoid Hub: https://hub.vroid.com/ (free VRM avatars)
+     - VRoid Studio: Create custom avatar (free software)
+     - Recommended: Download a CC0 licensed avatar
+  
+  3. CREATE a models README:
+     /Users/normanking/ServerProjectsMac/cortex-avatar/frontend/public/models/README.md
+     
+     Include:
+     - Where to get VRM models
+     - Recommended models for testing
+     - License considerations
+     - How to add custom models
+  
+  4. UPDATE frontend config to point to default model
+  
+  IMPORTANT: Check what exists, provide guidance for what's needed.
+  """
+
+# Step 4.4: Final integration and verification
+session: integrator
+  prompt: """
+  Perform final integration verification for the streaming avatar system.
+  
+  Working directory: /Users/normanking/ServerProjectsMac/cortex-avatar
+  
+  1. CHECK ALL NEW FILES EXIST:
+     Frontend:
+     - frontend/src/lib/avatar/TalkingHeadController.ts
+     - frontend/src/lib/avatar/AvatarScene.svelte
+     - frontend/src/lib/avatar/visemes.ts
+     - frontend/src/lib/avatar/emotions.ts
+     
+     Backend:
+     - internal/tts/cartesia.go
+     - internal/stt/deepgram.go
+     - internal/bridge/streaming_orchestrator.go
+  
+  2. CHECK PACKAGE.JSON:
+     - Verify three, @pixiv/three-vrm are in dependencies
+  
+  3. RUN BUILD:
+     ```bash
+     cd frontend && npm run build
+     ```
+     Report any TypeScript errors.
+  
+  4. CHECK GO BUILD:
+     ```bash
+     go build ./...
+     ```
+     Report any Go compilation errors.
+  
+  5. LIST ANY MISSING PIECES:
+     - Environment variables needed
+     - API keys required
+     - Configuration changes needed
+  
+  6. CREATE SETUP INSTRUCTIONS:
+     Write to: /Users/normanking/ServerProjectsMac/cortex-avatar/docs/STREAMING_SETUP.md
+     
+     Include:
+     - Environment variables to set
+     - Config file changes
+     - How to enable streaming mode
+     - How to test the avatar
+     - Troubleshooting common issues
+  
+  IMPORTANT: This is the final verification. Report status of each component.
+  """

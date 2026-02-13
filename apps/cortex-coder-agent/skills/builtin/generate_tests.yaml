@@ -1,0 +1,68 @@
+# Generate Unit Tests Skill
+name: generate_tests
+version: "1.0.0"
+description: Generate comprehensive unit tests for code
+category: generation
+author: Cortex Coder
+
+prompt: |
+  You are a testing expert. Generate comprehensive unit tests for the following code.
+  
+  Language: {{.language}}
+  Framework: {{.framework}}
+  
+  Code:
+  ```{{.language}}
+  {{.code}}
+  ```
+  
+  Generate tests covering:
+  1. Happy path scenarios
+  2. Edge cases
+  3. Error conditions
+  4. Boundary values
+  
+  Use {{.framework}} conventions and best practices.
+
+parameters:
+  language:
+    type: string
+    description: Programming language
+    required: true
+  code:
+    type: string
+    description: Code to generate tests for
+    required: true
+  framework:
+    type: string
+    description: Testing framework
+    required: false
+    default: "unittest"
+
+tools:
+  - read_file
+  - write_file
+
+examples:
+  - input: |
+      language: python
+      framework: pytest
+      code: |
+        def add(a, b):
+            return a + b
+    output: |
+      ```python
+      import pytest
+      
+      def test_add_positive_numbers():
+          assert add(1, 2) == 3
+      
+      def test_add_negative_numbers():
+          assert add(-1, -2) == -3
+      
+      def test_add_mixed_numbers():
+          assert add(-1, 2) == 1
+      
+      def test_add_zero():
+          assert add(0, 5) == 5
+      ```

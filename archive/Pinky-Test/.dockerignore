@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.docker
+
+# Documentation
+*.md
+docs/
+!README.md
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts (we rebuild in Docker)
+pinky
+*.exe
+
+# Node modules (we reinstall in Docker)
+web/node_modules/
+web/dist/
+
+# Go build cache
+*.test
+*.out
+coverage.txt
+
+# Development files
+.env
+.env.*
+!.env.example
+
+# Beads (Gas Town)
+.beads/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

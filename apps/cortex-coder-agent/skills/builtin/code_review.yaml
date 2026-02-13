@@ -1,0 +1,61 @@
+# Code Review Skill
+name: code_review
+version: "1.0.0"
+description: Review code for bugs, style issues, and best practices
+category: review
+author: Cortex Coder
+
+prompt: |
+  You are an expert code reviewer. Review the following code and provide detailed feedback.
+  
+  Context:
+  - Language: {{.language}}
+  - Focus Areas: {{.focus_areas}}
+  
+  Code:
+  ```{{.language}}
+  {{.code}}
+  ```
+  
+  Please analyze the code for:
+  1. Bugs and potential issues
+  2. Code style and readability
+  3. Performance concerns
+  4. Security vulnerabilities
+  5. Best practices violations
+  
+  Provide a detailed review with specific line numbers and suggestions for improvement.
+
+parameters:
+  language:
+    type: string
+    description: Programming language
+    required: true
+    default: "python"
+  code:
+    type: string
+    description: Code to review
+    required: true
+  focus_areas:
+    type: string
+    description: Areas to focus on (comma-separated)
+    required: false
+    default: "all"
+
+tools:
+  - read_file
+  - search
+
+examples:
+  - input: |
+      language: python
+      focus_areas: bugs, security
+      code: |
+        def login(username, password):
+            if username == "admin" and password == "secret":
+                return True
+            return False
+    output: |
+      Security Issue: Hardcoded credentials found.
+      Line 3: Use environment variables or secure vault.
+    notes: "Demonstrates credential handling issue"

@@ -1,0 +1,28 @@
+name: refactor-code
+description: Refactor and improve the selected code
+version: "1.0.0"
+category: refactoring
+author: Cortex Coder Agent
+triggers:
+  - type: selection
+  - type: command
+    command: refactor
+template: |
+  Refactor the following {{.Language}} code to improve it:
+
+  ```{{.Language}}
+  {{.Selection}}
+  ```
+
+  **File:** {{.FilePath}}
+  **Line:** {{.LineNumber}}
+
+  Please refactor this code to be:
+  1. More readable and maintainable
+  2. More efficient if possible
+  3. Following best practices for {{.Language}}
+
+  {{if .FunctionName}}The code is in a function named "{{.FunctionName}}".{{end}}
+  {{if .ClassName}}The code is in a class named "{{.ClassName}}".{{end}}
+
+  Provide the refactored code with explanations of the changes made.

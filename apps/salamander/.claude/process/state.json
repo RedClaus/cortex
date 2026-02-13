@@ -1,0 +1,14 @@
+{
+  "feature": null,
+  "currentPhase": null,
+  "startedAt": null,
+  "phaseHistory": [],
+  "gates": {
+    "discovery": {"passed": false, "missing": ["requirements.md", "success-criteria.md", "scope.md"]},
+    "design": {"passed": false, "missing": ["architecture.md", "api-contracts", "decisions"]},
+    "implementation": {"passed": false, "missing": ["source", "unit-tests"]},
+    "testing": {"passed": false, "missing": ["test-plan.md", "coverage"]},
+    "deployment": {"passed": false, "missing": ["release-notes.md", "rollback.md"]}
+  },
+  "processVersion": "1.0.0"
+}

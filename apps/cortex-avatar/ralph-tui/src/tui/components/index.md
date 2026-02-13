@@ -1,0 +1,177 @@
+---
+folder: components
+related_to: ["Cortex"]
+last_indexed: 2026-02-13T06:10:29.135906
+indexer: librarian
+---
+
+# 📁 components – Project Index
+
+## Overview
+This folder contains 22 documents related to Cortex in the broader Cortex ecosystem.
+
+## Chronological Record
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/IterationDetailView.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Build
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/App.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/HelpOverlay.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/SettingsView.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Build
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/ConfirmationDialog.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Production
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/TaskDetailView.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Production
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/EpicSelectionApp.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/EpicSelectionView.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Build
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/RunApp.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/Footer.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/RightPanel.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Build
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/IterationHistoryView.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Build
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/LeftPanel.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Build
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/Header.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/index.ts]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/ProgressDashboard.tsx]]
+- **Date:** 2026-01-11
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** UI
+- **Phase:** Build
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/SubagentSection.tsx]]
+- **Date:** 2026-01-12
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Agents
+- **Phase:** Production
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/SubagentTreePanel.tsx]]
+- **Date:** 2026-01-12
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Agents
+- **Phase:** Build
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/EpicLoaderOverlay.tsx]]
+- **Date:** 2026-01-12
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/PrdChatApp.tsx]]
+- **Date:** 2026-01-12
+- **Purpose:** prd
+- **Project:** Cortex
+- **Component:** Docs
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/ChatView.tsx]]
+- **Date:** 2026-01-12
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Design
+
+### [[Development/cortex-avatar/ralph-tui/src/tui/components/FormattedText.tsx]]
+- **Date:** 2026-01-16
+- **Purpose:** Documentation
+- **Project:** Cortex
+- **Component:** Unknown
+- **Phase:** Build
+
+
+## Key Milestones
+<!-- Add notable milestones as discovered -->
+
+## Open Questions / Gaps
+<!-- Note unclear transitions, missing documents, or ambiguous intent -->
+
+---
+*Generated by Librarian on {datetime.now().isoformat()}*

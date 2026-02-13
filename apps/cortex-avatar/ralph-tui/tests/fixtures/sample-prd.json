@@ -1,0 +1,39 @@
+{
+  "name": "Sample Feature",
+  "slug": "sample-feature",
+  "description": "A sample feature for testing purposes",
+  "targetUsers": "Developers using Ralph TUI",
+  "problemStatement": "Need to test PRD parsing functionality",
+  "solution": "Create sample PRD fixtures for testing",
+  "successMetrics": "All tests pass with sample data",
+  "constraints": "Must match GeneratedPrd interface",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "First user story",
+      "description": "As a developer, I want to load sample PRDs for testing",
+      "acceptanceCriteria": [
+        "PRD file can be loaded",
+        "Data matches expected structure"
+      ],
+      "priority": 1,
+      "labels": ["testing"],
+      "dependsOn": []
+    },
+    {
+      "id": "US-002",
+      "title": "Second user story",
+      "description": "As a tester, I want to verify PRD parsing",
+      "acceptanceCriteria": [
+        "User stories are parsed correctly",
+        "All fields are populated"
+      ],
+      "priority": 2,
+      "labels": ["testing", "validation"],
+      "dependsOn": ["US-001"]
+    }
+  ],
+  "technicalNotes": "Sample data for unit tests",
+  "branchName": "feature/sample-feature",
+  "createdAt": "2026-01-15T00:00:00.000Z"
+}
