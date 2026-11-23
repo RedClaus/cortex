@@ -302,3 +302,14 @@ func TestAppKeyMap(t *testing.T) {
 	assert.NotNil(t, keys.ShowEditor)
 	assert.NotNil(t, keys.ShowDiff)
 }
+
+func TestNewAppModel_BrainClientFromConfig(t *testing.T) {
+	model, err := NewAppModel(AppConfig{
+		Theme:      ThemeDracula,
+		RootPath:   ".",
+		BrainURL:   "http://brain.test:1234",
+		BrainWSURL: "ws://brain.test:1234/bus",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "http://brain.test:1234", model.cbClient.BaseURL())
+}

@@ -44,7 +44,7 @@ Configuration:
 
 Environment Variables:
   CORTEXBRAIN_URL     - CortexBrain API URL
-  CORTEXBRAIN_WSURL   - CortexBrain WebSocket URL
+  CORTEXBRAIN_WS_URL  - CortexBrain WebSocket URL (legacy alias: CORTEXBRAIN_WSURL)
   CORTEXBRAIN_TOKEN   - Authentication token
   CORTEX_AGENT_MODE   - Default mode (interactive, json, rpc)`,
 	Version: version.Version,
@@ -140,6 +140,9 @@ func runInteractiveMode(cfg *config.Config) error {
 		SessionName:  filepath.Base(projectPath),
 		AutoSave:     cfg.Session.AutoSave,
 		SaveInterval: saveInterval,
+		BrainURL:     cfg.CortexBrain.URL,
+		BrainWSURL:   cfg.CortexBrain.WSURL,
+		BrainToken:   cfg.CortexBrain.Token,
 	}
 	
 	// Run the TUI
@@ -242,6 +245,9 @@ func runTUICmd(cmd *cobra.Command, args []string) error {
 		SessionName:  filepath.Base(projectPath),
 		AutoSave:     cfg.Session.AutoSave,
 		SaveInterval: saveInterval,
+		BrainURL:     cfg.CortexBrain.URL,
+		BrainWSURL:   cfg.CortexBrain.WSURL,
+		BrainToken:   cfg.CortexBrain.Token,
 	}
 	
 	// Run the TUI
@@ -374,6 +380,9 @@ func runSessionLoad(cmd *cobra.Command, args []string) error {
 		SessionName:  sess.Name,
 		AutoSave:     cfg.Session.AutoSave,
 		SaveInterval: saveInterval,
+		BrainURL:     cfg.CortexBrain.URL,
+		BrainWSURL:   cfg.CortexBrain.WSURL,
+		BrainToken:   cfg.CortexBrain.Token,
 	}
 	
 	// Run the TUI

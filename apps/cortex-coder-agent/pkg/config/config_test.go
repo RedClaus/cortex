@@ -14,8 +14,8 @@ func TestDefaultConfig(t *testing.T) {
 
 	assert.Equal(t, "cortex-coder", cfg.Agent.Name)
 	assert.Equal(t, "interactive", cfg.Agent.Mode)
-	assert.Equal(t, "http://192.168.1.186:18892", cfg.CortexBrain.URL)
-	assert.Equal(t, "ws://192.168.1.186:18892/bus", cfg.CortexBrain.WSURL)
+	assert.Equal(t, "http://127.0.0.1:8080", cfg.CortexBrain.URL)
+	assert.Equal(t, "ws://127.0.0.1:8080/bus", cfg.CortexBrain.WSURL)
 	assert.Equal(t, "", cfg.CortexBrain.Token)
 	assert.Equal(t, "dracula", cfg.TUI.Theme)
 	assert.True(t, cfg.TUI.ShowLineNumbers)
@@ -226,4 +226,13 @@ func TestGetConfigPath(t *testing.T) {
 func TestConfigFileExists(t *testing.T) {
 	// Test with non-existent file
 	assert.False(t, ConfigFileExists())
+}
+
+func TestLoad_BrainEnvOverridesDefault(t *testing.T) {
+	t.Setenv("CORTEXBRAIN_URL", "http://env.test:1")
+	t.Setenv("CORTEXBRAIN_WS_URL", "ws://env.test:1/bus")
+	cfg, err := Load("")
+	require.NoError(t, err)
+	assert.Equal(t, "http://env.test:1", cfg.CortexBrain.URL)
+	assert.Equal(t, "ws://env.test:1/bus", cfg.CortexBrain.WSURL)
 }

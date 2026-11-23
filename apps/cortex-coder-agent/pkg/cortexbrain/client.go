@@ -601,3 +601,6 @@ type HTTPError struct {
 func (e *HTTPError) Error() string {
 	return fmt.Sprintf("HTTP %d: %s", e.StatusCode, e.Message)
 }
+
+// BaseURL returns the CortexBrain HTTP base URL the client was built with.
+func (c *Client) BaseURL() string { return c.baseURL }

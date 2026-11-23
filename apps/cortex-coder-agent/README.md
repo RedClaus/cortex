@@ -45,7 +45,7 @@ An intelligent coding assistant built on top of CortexBrain, featuring a modern 
 ### Prerequisites
 
 - Go 1.24.2 or later
-- CortexBrain server running (Pink: http://192.168.1.186:18892)
+- CortexBrain server running (default `http://127.0.0.1:8080`; override with `CORTEXBRAIN_URL`, `CORTEXBRAIN_WS_URL`, `CORTEXBRAIN_TOKEN` or `cortexbrain.url` / `cortexbrain.ws_url` in config.yaml)
 
 ### Build from Source
 
@@ -201,7 +201,7 @@ If you can't connect to CortexBrain:
 
 ```bash
 # Check if CortexBrain is running
-curl http://192.168.1.186:18892/health
+curl "${CORTEXBRAIN_URL:-http://127.0.0.1:8080}/health"
 
 # Verify the URL in your configuration
 # Update if running on different host/port
