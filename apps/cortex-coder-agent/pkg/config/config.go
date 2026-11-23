@@ -50,6 +50,12 @@ type SessionConfig struct {
 	SaveInterval string `mapstructure:"save_interval"`
 }
 
+// Local CortexBrain defaults (port 8080 per the Cortex ecosystem docs); override via CORTEXBRAIN_URL / CORTEXBRAIN_WS_URL.
+const (
+	DefaultBrainURL   = "http://127.0.0.1:8080"
+	DefaultBrainWSURL = "ws://127.0.0.1:8080/bus"
+)
+
 // DefaultConfig returns a new configuration with default values
 func DefaultConfig() *Config {
 	return &Config{
@@ -58,8 +64,8 @@ func DefaultConfig() *Config {
 			Mode: "interactive",
 		},
 		CortexBrain: CortexBrainConfig{
-			URL:   "http://192.168.1.186:18892",
-			WSURL: "ws://192.168.1.186:18892/bus",
+			URL:   DefaultBrainURL,
+			WSURL: DefaultBrainWSURL,
 			Token: "",
 		},
 		TUI: TUIConfig{
@@ -94,7 +100,7 @@ func Load(configPath string) (*Config, error) {
 
 	// Environment variable mapping
 	v.BindEnv("cortexbrain.url", "CORTEXBRAIN_URL")
-	v.BindEnv("cortexbrain.ws_url", "CORTEXBRAIN_WSURL")
+	v.BindEnv("cortexbrain.ws_url", "CORTEXBRAIN_WS_URL", "CORTEXBRAIN_WSURL") // WSURL kept as legacy alias
 	v.BindEnv("cortexbrain.token", "CORTEXBRAIN_TOKEN")
 	v.BindEnv("agent.name", "CORTEX_AGENT_NAME")
 	v.BindEnv("agent.mode", "CORTEX_AGENT_MODE")

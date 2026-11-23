@@ -44,6 +44,9 @@ type AppConfig struct {
 	SelectedModel  string
 	MaxFileSize    int64 // Maximum file size to load
 	ChatRetention  int   // Maximum chat messages to keep
+	BrainURL       string // CortexBrain HTTP base URL (from config)
+	BrainWSURL     string // CortexBrain WebSocket URL (from config)
+	BrainToken     string // CortexBrain auth token (from config)
 }
 
 // AppModel is the main application model
@@ -147,8 +150,7 @@ func NewAppModel(config AppConfig) (*AppModel, error) {
 		config.ChatRetention = 100 // 100 messages default
 	}
 	
-	// Create CortexBrain client (Pink runs the brain)
-	cbClient := cortexbrain.NewClient("http://192.168.1.186:18892", "ws://192.168.1.186:18892/ws", "")
+	cbClient := cortexbrain.NewClient(config.BrainURL, config.BrainWSURL, config.BrainToken)
 	app.cbClient = cbClient
 	
 	// Create components
